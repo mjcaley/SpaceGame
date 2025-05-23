@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36121.58 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceGame.Core", "SpaceGame\SpaceGame.Core.csproj", "{EB460769-7B43-415F-B1C0-1CC751ECBD58}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceGame.Console", "SpaceGame.Console\SpaceGame.Console.csproj", "{F2DEB4E9-4A1C-436B-B312-CE1DC85B2BFA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceGame.Renderer", "SpaceGame.Renderer\SpaceGame.Renderer.csproj", "{32A6E731-2FBF-440B-8622-C6EF07B9535A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EB460769-7B43-415F-B1C0-1CC751ECBD58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB460769-7B43-415F-B1C0-1CC751ECBD58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB460769-7B43-415F-B1C0-1CC751ECBD58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB460769-7B43-415F-B1C0-1CC751ECBD58}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2DEB4E9-4A1C-436B-B312-CE1DC85B2BFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2DEB4E9-4A1C-436B-B312-CE1DC85B2BFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2DEB4E9-4A1C-436B-B312-CE1DC85B2BFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2DEB4E9-4A1C-436B-B312-CE1DC85B2BFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32A6E731-2FBF-440B-8622-C6EF07B9535A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32A6E731-2FBF-440B-8622-C6EF07B9535A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32A6E731-2FBF-440B-8622-C6EF07B9535A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32A6E731-2FBF-440B-8622-C6EF07B9535A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {23D0AD0E-D1E3-49C9-97A7-54DA321A3A02}
+	EndGlobalSection
+EndGlobal
