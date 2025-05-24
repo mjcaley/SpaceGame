@@ -14,9 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SpaceGame.Core\SpaceGame.Core.csproj" />
     <ProjectReference Include="..\SpaceGame.Infrastructure\SpaceGame.Infrastructure.csproj" />
     <ProjectReference Include="..\SpaceGame.Renderer\SpaceGame.Renderer.csproj" />
-    <ProjectReference Include="..\SpaceGame\SpaceGame.Core.csproj" />
   </ItemGroup>
 
 </Project>
