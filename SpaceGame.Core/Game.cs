@@ -5,19 +5,12 @@ using Flecs.NET.Core;
 
 namespace SpaceGame.Core;
 
-public class Game
+public class Game(IRenderer renderer)
 {
-    public Game(IRenderer renderer)
-    {
-        this.renderer = renderer;
-
-    }
-
     public World World { get; private set; } = World.Create();
     private bool running = false;
-    private readonly IRenderer renderer;
 
-    public void Setup()
+    private void Setup()
     {
         World.System("Renderer")
             .Kind(Ecs.PostFrame)

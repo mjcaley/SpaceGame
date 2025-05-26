@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceGame.Infrastructure", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceGame.Core", "SpaceGame.Core\SpaceGame.Core.csproj", "{6F6E04E6-2380-43EC-92D7-20976DBF6237}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceGame.Assets", "SpaceGame.Assets\SpaceGame.Assets.csproj", "{70FC43C6-3136-447E-8E9A-B18685136FFF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceGame.SDLWrapper", "SpaceGame.SDLWrapper\SpaceGame.SDLWrapper.csproj", "{663D1FCC-03B8-4BEA-BF6C-1365249051FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{6F6E04E6-2380-43EC-92D7-20976DBF6237}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F6E04E6-2380-43EC-92D7-20976DBF6237}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F6E04E6-2380-43EC-92D7-20976DBF6237}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70FC43C6-3136-447E-8E9A-B18685136FFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70FC43C6-3136-447E-8E9A-B18685136FFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70FC43C6-3136-447E-8E9A-B18685136FFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70FC43C6-3136-447E-8E9A-B18685136FFF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{663D1FCC-03B8-4BEA-BF6C-1365249051FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{663D1FCC-03B8-4BEA-BF6C-1365249051FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{663D1FCC-03B8-4BEA-BF6C-1365249051FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{663D1FCC-03B8-4BEA-BF6C-1365249051FD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
