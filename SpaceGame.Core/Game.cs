@@ -35,8 +35,12 @@ public class Game(IRenderer renderer)
     {
         Console.WriteLine("Hello, Space Game!");
         Setup();
-        running = true;
 
-        while (World.Progress()) {}
+        while (World.Progress()) {
+            if (World.ShouldQuit())
+            {
+                break;
+            }
+        }
     }
 }
