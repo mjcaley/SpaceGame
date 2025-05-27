@@ -1,5 +1,5 @@
 ﻿using SpaceGame.Infrastructure;
-using SDL3;
+using SpaceGame.SDLWrapper;
 using static SDL3.SDL;
 
 namespace SpaceGame.Renderer;
@@ -25,60 +25,6 @@ public class Renderer : IRenderer, IDisposable
 
     private List<Sprite> _sprites = [];
     private bool disposedValue;
-
-    public unsafe VertexShader CreateVertexShader(byte[] code, string entryPoint)
-    {
-        fixed (byte* codePtr = code) 
-        fixed (char* entryPointPtr = entryPoint)
-        {
-            GPUShaderCreateInfo info = new()
-            {
-                CodeSize=(nuint)code.Length,
-                Code=(nint)codePtr,
-                Entrypoint = (nint)entryPointPtr,
-                Format = GPUShaderFormat.SPIRV,
-                Stage = GPUShaderStage.Vertex,
-                NumSamplers = 0,
-                NumStorageBuffers = 0,
-                NumStorageTextures = 0,
-                NumUniformBuffers = 0
-            };
-            var shader = CreateGPUShader(_gpuDevice.Handle, info);
-            if (shader == nint.Zero)
-            {
-                throw new NullReferenceException("Vertex shader returned null pointer");
-            }
-            
-            return new VertexShader(_gpuDevice.Handle, shader);
-        }
-    }
-
-    public unsafe FragmentShader CreateFragmentShader(byte[] code, string entryPoint)
-    {
-        fixed (byte* codePtr = code) 
-        fixed (char* entryPointPtr = entryPoint)
-        {
-            GPUShaderCreateInfo info = new()
-            {
-                CodeSize=(nuint)code.Length,
-                Code=(nint)codePtr,
-                Entrypoint = (nint)entryPointPtr,
-                Format = GPUShaderFormat.SPIRV,
-                Stage = GPUShaderStage.Fragment,
-                NumSamplers = 0,
-                NumStorageBuffers = 0,
-                NumStorageTextures = 0,
-                NumUniformBuffers = 0
-            };
-            var shader = CreateGPUShader(_gpuDevice.Handle, info);
-            if (shader == nint.Zero)
-            {
-                throw new NullReferenceException("Vertex shader returned null pointer");
-            }
-            
-            return new FragmentShader(_gpuDevice.Handle, shader);
-        }
-    }
 
     public SpritePipeline CreateSpritePipeline(VertexShader vertexShader, FragmentShader fragmentShader)
     {
@@ -271,5 +217,16 @@ public class Renderer : IRenderer, IDisposable
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
+    }
+
+    public IShader CreateShader(ref ShaderCreateInfo shaderCreateInfo)
+    {
+        var shader = CreateGPUShader(_gpuDevice.Handle, shaderCreateInfo.ToSDL());
+        if (shader == nint.Zero)
+        {
+            throw new NullReferenceException("Shader returned null pointer");
+        }
+
+        return new Shader(_gpuDevice, shader);
     }
 }
