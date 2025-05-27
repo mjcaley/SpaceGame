@@ -39,7 +39,7 @@ public class Game(IRenderer renderer)
                     .WithRenderPass(
                         (cmd, pass) =>
                         {
-                            
+                            // how to i handle storing buffer state?
                         })
                     .Submit();
             });

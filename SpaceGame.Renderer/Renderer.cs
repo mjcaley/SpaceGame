@@ -1,7 +1,6 @@
 ﻿using SpaceGame.Infrastructure;
 using SDL3;
 using static SDL3.SDL;
-using Silk.NET.Maths;
 
 namespace SpaceGame.Renderer;
 
@@ -23,12 +22,9 @@ public class Renderer : IRenderer, IDisposable
     private uint _transferBufferSize = 0;
     private nint _vertexBuffer = nint.Zero;
     private uint _vertexBufferSize = 0;
-    private nint _pipeline;
 
     private List<Sprite> _sprites = [];
     private bool disposedValue;
-
-    private nint _commandBuffer = nint.Zero;
 
     public unsafe VertexShader CreateVertexShader(byte[] code, string entryPoint)
     {
@@ -56,6 +52,7 @@ public class Renderer : IRenderer, IDisposable
             return new VertexShader(_gpuDevice.Handle, shader);
         }
     }
+
     public unsafe FragmentShader CreateFragmentShader(byte[] code, string entryPoint)
     {
         fixed (byte* codePtr = code) 

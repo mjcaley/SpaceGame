@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <PackageReference Include="SDL3-CS" Version="3.2.14.2" />
-    <PackageReference Include="Silk.NET.Maths" Version="2.22.0" />
   </ItemGroup>
 
   <ItemGroup>

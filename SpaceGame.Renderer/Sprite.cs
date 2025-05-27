@@ -1,17 +1,17 @@
 ﻿using System.Linq;
-using Silk.NET.Maths;
+using System.Numerics;
 
 namespace SpaceGame.Renderer;
 
 public class Sprite
 {
-    public Vector2D<double> Origin { get; set; } = Vector2D<double>.Zero;
-    public Vector2D<double> Size { get; set; } = Vector2D<double>.Zero;
-    public Vector4D<double> Colour { get; set; } = Vector4D<double>.Zero;
+    public Vector2 Origin { get; set; } = Vector2.Zero;
+    public Vector2 Size { get; set; } = Vector2.Zero;
+    public Vector4 Colour { get; set; } = Vector4.Zero;
 
-    public List<Vector2D<double>> Vertices()
+    public List<Vector2> Vertices()
     {
-        var vertices = new List<Vector2D<double>>
+        var vertices = new List<Vector2>
         {
             new(Origin.X, Origin.Y),
             new(Origin.X + Size.X, Origin.Y),
@@ -26,6 +26,6 @@ public class Sprite
 
     // public double[] ToArray()
     // {
-    //     return Vertices().Select<Vector2D<double>, double[]>(vertex => return [vertex.X, vertex.Y]);
+    //     return Vertices().Select<Vector2, double[]>(vertex => return [vertex.X, vertex.Y]);
     // }
 }

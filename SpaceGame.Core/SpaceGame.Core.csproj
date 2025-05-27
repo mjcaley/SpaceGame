@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="Flecs.NET.Debug" Version="4.0.3" />
-    <PackageReference Include="Silk.NET.Maths" Version="2.22.0" />
   </ItemGroup>
 
   <ItemGroup>
