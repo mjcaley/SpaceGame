@@ -15,6 +15,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceGame.Assets", "SpaceGa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceGame.SDLWrapper", "SpaceGame.SDLWrapper\SpaceGame.SDLWrapper.csproj", "{663D1FCC-03B8-4BEA-BF6C-1365249051FD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceGame.Core2", "SpaceGame.Core2\SpaceGame.Core2.csproj", "{93542A2C-BB41-41BC-B4D8-DB3EAB189279}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoonWorks", "submodules\MoonWorks\MoonWorks.csproj", "{066D2849-B5EB-41A2-BD0B-F6036C7A9643}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoonWorks.Native", "MoonWorks.Native\MoonWorks.Native.csproj", "{B2EFF509-8C55-4722-9DC8-CAA577A5814E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +51,18 @@ Global
 		{663D1FCC-03B8-4BEA-BF6C-1365249051FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{663D1FCC-03B8-4BEA-BF6C-1365249051FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{663D1FCC-03B8-4BEA-BF6C-1365249051FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93542A2C-BB41-41BC-B4D8-DB3EAB189279}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93542A2C-BB41-41BC-B4D8-DB3EAB189279}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93542A2C-BB41-41BC-B4D8-DB3EAB189279}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93542A2C-BB41-41BC-B4D8-DB3EAB189279}.Release|Any CPU.Build.0 = Release|Any CPU
+		{066D2849-B5EB-41A2-BD0B-F6036C7A9643}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{066D2849-B5EB-41A2-BD0B-F6036C7A9643}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{066D2849-B5EB-41A2-BD0B-F6036C7A9643}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{066D2849-B5EB-41A2-BD0B-F6036C7A9643}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2EFF509-8C55-4722-9DC8-CAA577A5814E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2EFF509-8C55-4722-9DC8-CAA577A5814E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2EFF509-8C55-4722-9DC8-CAA577A5814E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2EFF509-8C55-4722-9DC8-CAA577A5814E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
