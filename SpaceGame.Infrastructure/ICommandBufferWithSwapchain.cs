@@ -10,8 +10,6 @@ namespace SpaceGame.Infrastructure
         ICommandBufferWithSwapchain Update(Action<ICommandBufferWithSwapchain> func);
         ICommandBufferWithSwapchain WithCopyPass(Action<nint, nint> func);
         ICommandBufferWithSwapchain WithRenderPass(Action<nint, nint> func);
-        ICommandBufferWithSwapchain WithRenderPass(GPUColorTargetInfo[] colorTargetInfo, Action<nint, nint> func);
-        ICommandBufferWithSwapchain WithRenderPass(GPUColorTargetInfo colorTargetInfo, Action<nint, nint> func);
         void Submit();
     }
 }
