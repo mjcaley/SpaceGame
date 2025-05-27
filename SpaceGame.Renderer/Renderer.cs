@@ -88,7 +88,7 @@ public class Renderer : IRenderer, IDisposable
         return new SpritePipeline(_gpuDevice.Handle, 0);
     }
 
-    public CommandBuffer AcquireCommandBuffer()
+    public ICommandBuffer AcquireCommandBuffer()
     {
         var commandBuffer = AcquireGPUCommandBuffer(_gpuDevice.Handle);
         if (commandBuffer == nint.Zero)
@@ -96,7 +96,7 @@ public class Renderer : IRenderer, IDisposable
             throw new NullReferenceException("Command buffer is null pointer");
         }
 
-        return new CommandBuffer(this, commandBuffer);
+        return new CommandBuffer(this, commandBuffer, _window.Handle);
     }
     
     private static uint Size(List<Sprite> sprites)

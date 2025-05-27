@@ -3,4 +3,5 @@
 public interface IRenderer
 {
     void Draw();
+    ICommandBuffer AcquireCommandBuffer();
 }

@@ -1,7 +1,10 @@
 ﻿using SpaceGame.Infrastructure;
 using SpaceGame.Core.Components;
 using Flecs.NET;
+using Flecs.NET.Bindings;
 using Flecs.NET.Core;
+using SDL3;
+using static SDL3.SDL;
 
 namespace SpaceGame.Core;
 
@@ -17,7 +20,23 @@ public class Game(IRenderer renderer)
             .Iter(() =>
             {
                 Console.WriteLine("renderer");
-                renderer.Draw();
+
+                var commandBuffer = renderer.AcquireCommandBuffer();
+                commandBuffer
+                    .AcquireSwapchainTexture()
+                    .WithRenderPass(
+                        new GPUColorTargetInfo()
+                        {
+                            Texture=commandBuffer.SwapchainTexture!.Value,
+                            ClearColor=new FColor { R=1.0f, G=0, B=0, A=1.0f },
+                            LoadOp=GPULoadOp.Clear,
+                            StoreOp=GPUStoreOp.Store
+                        },
+                        (cmd, pass) =>
+                        {
+                            
+                        })
+                    .Submit();
             });
 
         World.System("Frame timer")

@@ -1,4 +1,5 @@
-﻿using Silk.NET.Maths;
+﻿using System.Linq;
+using Silk.NET.Maths;
 
 namespace SpaceGame.Renderer;
 
@@ -22,4 +23,9 @@ public class Sprite
 
         return vertices;
     }
+
+    // public double[] ToArray()
+    // {
+    //     return Vertices().Select<Vector2D<double>, double[]>(vertex => return [vertex.X, vertex.Y]);
+    // }
 }

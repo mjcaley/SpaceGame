@@ -3,11 +3,13 @@ using static SDL3.SDL;
 
 namespace SpaceGame.Renderer;
 
-public class CommandBuffer(IRenderer renderer, nint CommandBufferHandle)
+public class CommandBuffer(IRenderer renderer, nint CommandBufferHandle, nint windowHandle) : ICommandBuffer
 {
     public IRenderer Renderer { get; init; } = renderer;
     public nint CommandBufferHandle { get; private set; }
 
+    public nint? SwapchainTexture { get; private set; }
+    
     public void Cancel()
     {
         CancelGPUCommandBuffer(CommandBufferHandle);
@@ -20,7 +22,27 @@ public class CommandBuffer(IRenderer renderer, nint CommandBufferHandle)
         CommandBufferHandle = nint.Zero;
     }
 
-    public CommandBuffer WithCopyPass(Action<nint, nint> func)
+    public ICommandBuffer AcquireSwapchainTexture()
+    {
+        var swapchainResult = WaitAndAcquireGPUSwapchainTexture(
+            CommandBufferHandle,
+            windowHandle,
+            out var swapchainTexture,
+            out var swapchainWidth,
+            out var swapchainHeight);
+
+        if (!swapchainResult)
+        {
+            throw new Exception(); // TODO: Implement a nicer exception 
+        }
+        
+        SwapchainTexture = swapchainTexture;
+        // TODO: Save width and height
+
+        return this;
+    }
+
+    public ICommandBuffer WithCopyPass(Action<nint, nint> func)
     {
         var copyPass = BeginGPUCopyPass(CommandBufferHandle);
         if (copyPass == nint.Zero)
@@ -35,7 +57,7 @@ public class CommandBuffer(IRenderer renderer, nint CommandBufferHandle)
         return this;
     }
     
-    public CommandBuffer WithRenderPass(GPUColorTargetInfo colorTargetInfo, Action<nint, nint> func)
+    public ICommandBuffer WithRenderPass(GPUColorTargetInfo colorTargetInfo, Action<nint, nint> func)
     {
         var copyPass = BeginGPURenderPass(
             CommandBufferHandle,
@@ -54,7 +76,7 @@ public class CommandBuffer(IRenderer renderer, nint CommandBufferHandle)
         return this;
     }
 
-    public CommandBuffer WithRenderPass(GPUColorTargetInfo[] colorTargetInfo, Action<nint, nint> func)
+    public ICommandBuffer WithRenderPass(GPUColorTargetInfo[] colorTargetInfo, Action<nint, nint> func)
     {
         var copyPass = BeginGPURenderPass(
             CommandBufferHandle,
