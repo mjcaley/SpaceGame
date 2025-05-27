@@ -90,26 +90,15 @@ public class Renderer : IRenderer, IDisposable
 
     public CommandBuffer AcquireCommandBuffer()
     {
-        if (_commandBuffer == nint.Zero)
+        var commandBuffer = AcquireGPUCommandBuffer(_gpuDevice.Handle);
+        if (commandBuffer == nint.Zero)
         {
-            _commandBuffer = AcquireGPUCommandBuffer(_gpuDevice.Handle);
-            if (_commandBuffer == nint.Zero)
-            {
-                throw new NullReferenceException("Command buffer is null pointer");
-            }
-
-            return new CommandBuffer(this, _commandBuffer);
+            throw new NullReferenceException("Command buffer is null pointer");
         }
-        
-        return new CommandBuffer(this, _commandBuffer);
-    }
 
-    public void SubmitCommandBuffer(CommandBuffer commandBuffer)
-    {
-        SubmitGPUCommandBuffer(commandBuffer.CommandBufferHandle);
-        _commandBuffer = nint.Zero;
+        return new CommandBuffer(this, commandBuffer);
     }
-
+    
     private static uint Size(List<Sprite> sprites)
     {
         var vertices = sizeof(float) * 2 * 6;
