@@ -4,9 +4,7 @@ namespace SpaceGame.Infrastructure;
 
 public interface ICommandBuffer
 {
-    nint? SwapchainTexture { get; }
-
-    ICommandBuffer AcquireSwapchainTexture();
+    ICommandBufferWithSwapchain AcquireSwapchainTexture();
     ICommandBuffer WithCopyPass(Action<nint, nint> func);
     ICommandBuffer WithRenderPass(GPUColorTargetInfo[] colorTargetInfo, Action<nint, nint> func);
     ICommandBuffer WithRenderPass(GPUColorTargetInfo colorTargetInfo, Action<nint, nint> func);

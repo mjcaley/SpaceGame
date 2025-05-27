@@ -21,17 +21,22 @@ public class Game(IRenderer renderer)
             {
                 Console.WriteLine("renderer");
 
-                var commandBuffer = renderer.AcquireCommandBuffer();
-                commandBuffer
+                renderer
+                    .AcquireCommandBuffer()
                     .AcquireSwapchainTexture()
+                    .Update(cmd =>
+                    {
+                        cmd.ColorTargetInfo = [
+                            new ()
+                            {
+                                Texture = cmd.SwapchainTexture,
+                                ClearColor = new FColor { R = 1.0f, G = 0, B = 0, A = 1.0f },
+                                LoadOp = GPULoadOp.Clear,
+                                StoreOp = GPUStoreOp.Store
+                            }
+                        ];
+                    })
                     .WithRenderPass(
-                        new GPUColorTargetInfo()
-                        {
-                            Texture=commandBuffer.SwapchainTexture!.Value,
-                            ClearColor=new FColor { R=1.0f, G=0, B=0, A=1.0f },
-                            LoadOp=GPULoadOp.Clear,
-                            StoreOp=GPUStoreOp.Store
-                        },
                         (cmd, pass) =>
                         {
                             
