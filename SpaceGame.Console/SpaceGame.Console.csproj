@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.5" />
     <PackageReference Include="SDL3-CS" Version="3.2.14.2" />
     <PackageReference Include="SDL3-CS.Native" Version="3.2.14" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.5" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,6 +20,22 @@
     <ProjectReference Include="..\SpaceGame.Infrastructure\SpaceGame.Infrastructure.csproj" />
     <ProjectReference Include="..\SpaceGame.Renderer\SpaceGame.Renderer.csproj" />
     <ProjectReference Include="..\SpaceGame.SDLWrapper\SpaceGame.SDLWrapper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="appsettings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>appsettings.json</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>appsettings.Designer.cs</LastGenOutput>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

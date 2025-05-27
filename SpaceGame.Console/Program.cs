@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SDL3;
 using Silk.NET.Maths;
@@ -9,34 +10,33 @@ using SpaceGame.Renderer;
 using SpaceGame.SDLWrapper;
 
 
-class Program
+var builder = Host.CreateApplicationBuilder(args);
+
+builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
 {
-    private static void Exit(string message, int exitCode)
-    {
-        Console.WriteLine(message);
-        Environment.Exit(exitCode);
-    }
+    [$"SpaceGame:Renderer:Width"] = "1025",
+    [$"SpaceGame:Renderer:Height"] = "768"
+});
 
-    public static void Main(string[] args)
-    {
-        var host =
-            Host.CreateDefaultBuilder(args)
-            .ConfigureServices(services => services
-                .AddSingleton<IWindow>(new Window("Space Game", 1024, 768))
-                .AddSingleton<IGpuDevice, GpuDevice>()
-                .AddSingleton<IRenderer, Renderer>()
-                .AddScoped<Game>()
-        ).Build();
+builder.Services.Configure<WindowSettings>(
+    builder.Configuration.GetSection(WindowSettings.SectionName));
 
-        var renderer = host.Services.GetRequiredService<IRenderer>() as Renderer;
-        renderer.Add(new Sprite()
-        {
-            Origin=new Vector2D<double>(0.1f, 0.1f),
-            Size=new Vector2D<double>(0.5f, 0.5f),
-            Colour= new Vector4D<double>(0, 0, 1.0f, 1.0f),
-        });
-        
-        var game = host.Services.GetRequiredService<Game>();
-        game.Run();
-    }
-}
+builder.Services
+    .AddScoped<IWindow, Window>()
+    .AddScoped<IGpuDevice, GpuDevice>()
+    .AddScoped<IRenderer, Renderer>()
+    .AddScoped<Game>()
+;
+    
+var host = builder.Build();
+
+var renderer = host.Services.GetRequiredService<IRenderer>() as Renderer;
+renderer.Add(new Sprite()
+{
+    Origin=new Vector2D<double>(0.1f, 0.1f),
+    Size=new Vector2D<double>(0.5f, 0.5f),
+    Colour= new Vector4D<double>(0, 0, 1.0f, 1.0f),
+});
+
+var game = host.Services.GetRequiredService<Game>();
+game.Run();
