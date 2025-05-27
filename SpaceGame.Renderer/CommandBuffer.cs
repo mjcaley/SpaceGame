@@ -58,38 +58,38 @@ public class CommandBuffer(IRenderer Renderer, nint CommandBufferHandle, nint wi
     
     public ICommandBuffer WithRenderPass(GPUColorTargetInfo colorTargetInfo, Action<nint, nint> func)
     {
-        var copyPass = BeginGPURenderPass(
+        var renderPass = BeginGPURenderPass(
             CommandBufferHandle,
             StructureToPointer<GPUColorTargetInfo>(colorTargetInfo),
             1,
             nint.Zero);
-        if (copyPass == nint.Zero)
+        if (renderPass == nint.Zero)
         {
             return this;
         }
         
-        func(CommandBufferHandle, copyPass);
+        func(CommandBufferHandle, renderPass);
         
-        EndGPUCopyPass(copyPass);
+        EndGPURenderPass(renderPass);
         
         return this;
     }
 
     public ICommandBuffer WithRenderPass(GPUColorTargetInfo[] colorTargetInfo, Action<nint, nint> func)
     {
-        var copyPass = BeginGPURenderPass(
+        var renderPass = BeginGPURenderPass(
             CommandBufferHandle,
             StructureArrayToPointer<GPUColorTargetInfo>(colorTargetInfo),
             (uint)colorTargetInfo.Length,
             nint.Zero);
-        if (copyPass == nint.Zero)
+        if (renderPass == nint.Zero)
         {
             return this;
         }
         
-        func(CommandBufferHandle, copyPass);
+        func(CommandBufferHandle, renderPass);
         
-        EndGPUCopyPass(copyPass);
+        EndGPURenderPass(renderPass);
         
         return this;
     }
@@ -153,38 +153,38 @@ public class CommandBufferWithSwapchain(IRenderer renderer, nint CommandBufferHa
 
     public ICommandBufferWithSwapchain WithRenderPass(GPUColorTargetInfo colorTargetInfo, Action<nint, nint> func)
     {
-        var copyPass = BeginGPURenderPass(
+        var renderPass = BeginGPURenderPass(
             CommandBufferHandle,
             StructureToPointer<GPUColorTargetInfo>(colorTargetInfo),
             1,
             nint.Zero);
-        if (copyPass == nint.Zero)
+        if (renderPass == nint.Zero)
         {
             return this;
         }
 
-        func(CommandBufferHandle, copyPass);
+        func(CommandBufferHandle, renderPass);
 
-        EndGPUCopyPass(copyPass);
+        EndGPURenderPass(renderPass);
 
         return this;
     }
 
     public ICommandBufferWithSwapchain WithRenderPass(GPUColorTargetInfo[] colorTargetInfo, Action<nint, nint> func)
     {
-        var copyPass = BeginGPURenderPass(
+        var renderPass = BeginGPURenderPass(
             CommandBufferHandle,
             StructureArrayToPointer(colorTargetInfo),
             (uint)colorTargetInfo.Length,
             nint.Zero);
-        if (copyPass == nint.Zero)
+        if (renderPass == nint.Zero)
         {
             return this;
         }
 
-        func(CommandBufferHandle, copyPass);
+        func(CommandBufferHandle, renderPass);
 
-        EndGPUCopyPass(copyPass);
+        EndGPURenderPass(renderPass);
 
         return this;
     }
