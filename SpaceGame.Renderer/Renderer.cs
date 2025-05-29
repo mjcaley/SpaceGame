@@ -1,4 +1,5 @@
-﻿using SpaceGame.Infrastructure;
+﻿using SDL3;
+using SpaceGame.Infrastructure;
 using SpaceGame.SDLWrapper;
 using static SDL3.SDL;
 
@@ -10,8 +11,6 @@ public class Renderer : IRenderer, IDisposable
     {
         _window = window;
         _gpuDevice = gpuDevice;
-
-        AllocateBuffers();
     }
 
     private IWindow _window;
@@ -24,6 +23,8 @@ public class Renderer : IRenderer, IDisposable
 
     private List<Sprite> _sprites = [];
     private bool disposedValue;
+
+    public IGpuDevice GpuDevice => _gpuDevice;
 
     public SpritePipeline CreateSpritePipeline(VertexShader vertexShader, FragmentShader fragmentShader)
     {
@@ -90,11 +91,45 @@ public class Renderer : IRenderer, IDisposable
         _vertexBufferSize = size;
     }
 
+    public ITransferBuffer CreateTransferBuffer(int size, GPUTransferBufferUsage usage)
+    {
+        var transferBuffer = CreateGPUTransferBuffer(_gpuDevice.Handle, new()
+        {
+            Usage = usage,
+            Size = (uint)size
+        });
+
+        if (transferBuffer == nint.Zero)
+        {
+            throw new NullReferenceException("Transfer buffer is null pointer");
+        }
+
+        return new TransferBuffer(_gpuDevice, transferBuffer, size);
+    }
+
+    public IVertexBuffer CreateVertexBuffer(int size)
+    {
+        var vertexBuffer = CreateGPUBuffer(_gpuDevice.Handle, new()
+        {
+            Usage = GPUBufferUsageFlags.Vertex,
+            Size = (uint)size
+        });
+
+        if (vertexBuffer == nint.Zero)
+        {
+            throw new NullReferenceException("Vertex buffer is null pointer");
+        }
+
+
+        return new VertexBuffer(_gpuDevice, vertexBuffer, size);
+    }
+
     public IGraphicsPipeline CreatePipeline(ref GraphicsPipelineCreateInfo pipelineCreateInfo)
     {
         var pipeline = CreateGPUGraphicsPipeline(_gpuDevice.Handle, pipelineCreateInfo.ToSDL());
         if (pipeline == nint.Zero)
         {
+            Console.WriteLine($"Failed to create graphics pipeline: {GetError()}");
             throw new NullReferenceException("Graphics pipeline is null pointer");
         }
 

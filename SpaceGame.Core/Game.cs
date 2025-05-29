@@ -11,11 +11,12 @@ namespace SpaceGame.Core;
 public class Game(IRenderer renderer)
 {
     public World World { get; private set; } = World.Create();
-    private bool running = false;
     private RenderSystem renderSystem = new(renderer);
 
     private void Setup()
     {
+
+
         World.System("Renderer")
             .Kind(Ecs.PostFrame)
             .Iter(() =>

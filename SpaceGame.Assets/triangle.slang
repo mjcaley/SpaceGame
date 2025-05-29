@@ -1,7 +1,7 @@
 struct AssembledVertex
 {
     float2 position : POSITION;
-    float3 color : COLOR;
+    float4 color : COLOR;
 };
 
 struct VertexOutput
@@ -14,7 +14,7 @@ struct VertexOutput
 func vertexMain(vertex: AssembledVertex) -> VertexOutput {
     VertexOutput output;
     output.position = float4(vertex.position, 0.0f, 1.0f);
-    output.color = float4(vertex.color, 1.0f);
+    output.color = vertex.color;
     
     return output;
 }
