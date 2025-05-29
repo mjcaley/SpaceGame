@@ -9,7 +9,7 @@ using SpaceGame.Infrastructure;
 
 namespace SpaceGame.SDLWrapper;
 
-public class Shader(IGpuDevice gpuDevice, nint handle) : IShader, IDisposable
+public class Shader(IGpuDevice gpuDevice, nint handle) : IShader
 {
     public nint Handle { get; private set; } = handle;
 

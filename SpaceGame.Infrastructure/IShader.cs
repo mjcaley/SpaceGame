@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SpaceGame.Infrastructure
+namespace SpaceGame.Infrastructure;
+
+public interface IShader : IDisposable
 {
-    public interface IShader
-    {
-        nint Handle { get; }
-    }
+    nint Handle { get; }
 }

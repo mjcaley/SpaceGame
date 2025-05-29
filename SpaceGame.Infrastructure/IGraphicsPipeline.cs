@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SpaceGame.Infrastructure;
 
-public interface IGraphicsPipeline
+public interface IGraphicsPipeline : IDisposable
 {
     nint Handle { get; }
 }

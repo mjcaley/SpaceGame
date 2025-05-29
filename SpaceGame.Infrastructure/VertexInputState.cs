@@ -7,10 +7,10 @@ using static SDL3.SDL;
 
 namespace SpaceGame.Infrastructure;
 
-public readonly struct VertexInputState(GPUVertexBufferDescription[] vertexBufferDescriptions, GPUVertexAttribute[] vertexAttributes)
+public struct VertexInputState(GPUVertexBufferDescription[] vertexBufferDescriptions, GPUVertexAttribute[] vertexAttributes)
 {
-    public GPUVertexBufferDescription[] VertexBufferDescriptions { get; } = vertexBufferDescriptions;
-    public GPUVertexAttribute[] VertexAttributes { get; } = vertexAttributes;
+    public GPUVertexBufferDescription[] VertexBufferDescriptions { get; set; } = vertexBufferDescriptions;
+    public GPUVertexAttribute[] VertexAttributes { get; set;  } = vertexAttributes;
 
     public GPUVertexInputState ToSDL()
     {

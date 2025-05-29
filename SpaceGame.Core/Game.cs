@@ -12,6 +12,7 @@ public class Game(IRenderer renderer)
 {
     public World World { get; private set; } = World.Create();
     private bool running = false;
+    private RenderSystem renderSystem = new(renderer);
 
     private void Setup()
     {
@@ -20,28 +21,7 @@ public class Game(IRenderer renderer)
             .Iter(() =>
             {
                 Console.WriteLine("renderer");
-
-                renderer
-                    .AcquireCommandBuffer()
-                    .AcquireSwapchainTexture()
-                    .Update(cmd =>
-                    {
-                        cmd.ColorTargetInfo = [
-                            new ()
-                            {
-                                Texture = cmd.SwapchainTexture,
-                                ClearColor = new FColor { R = 1.0f, G = 0, B = 0, A = 1.0f },
-                                LoadOp = GPULoadOp.Clear,
-                                StoreOp = GPUStoreOp.Store
-                            }
-                        ];
-                    })
-                    .WithRenderPass(
-                        (cmd, pass) =>
-                        {
-                            // how to i handle storing buffer state?
-                        })
-                    .Submit();
+                renderSystem.Process();
             });
 
         World.System("Frame timer")

@@ -12,7 +12,6 @@ public class Renderer : IRenderer, IDisposable
         _gpuDevice = gpuDevice;
 
         AllocateBuffers();
-        CreatePipeline();
     }
 
     private IWindow _window;
@@ -91,13 +90,15 @@ public class Renderer : IRenderer, IDisposable
         _vertexBufferSize = size;
     }
 
-    private void CreatePipeline()
+    public IGraphicsPipeline CreatePipeline(ref GraphicsPipelineCreateInfo pipelineCreateInfo)
     {
-        GPUGraphicsPipelineCreateInfo info = new()
+        var pipeline = CreateGPUGraphicsPipeline(_gpuDevice.Handle, pipelineCreateInfo.ToSDL());
+        if (pipeline == nint.Zero)
         {
-            
-            
-        };
+            throw new NullReferenceException("Graphics pipeline is null pointer");
+        }
+
+        return new GraphicsPipeline(_gpuDevice, pipeline);
     }
 
     private unsafe void Upload(nint commandBuffer)
