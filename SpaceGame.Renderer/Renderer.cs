@@ -25,6 +25,7 @@ public class Renderer : IRenderer, IDisposable
     private bool disposedValue;
 
     public IGpuDevice GpuDevice => _gpuDevice;
+    public IWindow Window => _window;
 
     public SpritePipeline CreateSpritePipeline(VertexShader vertexShader, FragmentShader fragmentShader)
     {

@@ -35,7 +35,8 @@ namespace SpaceGame.Core
                         new GPUVertexBufferDescription() { 
                             Slot = 0,
                             Pitch = sizeof(float) * 6,
-                            InputRate = GPUVertexInputRate.Vertex
+                            InputRate = GPUVertexInputRate.Vertex,
+                            InstanceStepRate = 0
                         }],
                     VertexAttributes = [
                         new GPUVertexAttribute()
@@ -54,7 +55,16 @@ namespace SpaceGame.Core
                         },
                     ]
                 },
-                PrimitiveType = GPUPrimitiveType.TriangleList
+                PrimitiveType = GPUPrimitiveType.TriangleList,
+                TargetInfo = new()
+                {
+                    ColorTargetDescriptions = [
+                        new() 
+                        {
+                            Format=GetGPUSwapchainTextureFormat(renderer.GpuDevice.Handle, renderer.Window.Handle),
+                        }
+                    ]
+                }
             };
             _pipeline = renderer.CreatePipeline(ref pipelineCreateInfo);
         }
@@ -122,9 +132,9 @@ namespace SpaceGame.Core
             mappedBuffer[30] = 0.5f;
             mappedBuffer[31] = 0.5f;
 
-            mappedBuffer[32] = 1f;
+            mappedBuffer[32] = 0f;
             mappedBuffer[33] = 1f;
-            mappedBuffer[34] = 1f;
+            mappedBuffer[34] = 0f;
             mappedBuffer[35] = 1.0f;
 
             UnmapGPUTransferBuffer(_renderer.GpuDevice.Handle, _uploadBuffer.Handle);
@@ -158,7 +168,7 @@ namespace SpaceGame.Core
                         new ()
                         {
                             Texture = cmd.SwapchainTexture,
-                            ClearColor = new FColor { R = 1.0f, G = 0, B = 0, A = 1.0f },
+                            ClearColor = new FColor { R = 0.5f, G = 0, B = 0.5f, A = 1.0f },
                             LoadOp = GPULoadOp.Clear,
                             StoreOp = GPUStoreOp.Store
                         }
@@ -172,12 +182,7 @@ namespace SpaceGame.Core
                             {
                                 Buffer = _vertexBuffer.Handle,
                                 Offset = 0
-                            },
-                            new GPUBufferBinding
-                            {
-                                Buffer = _vertexBuffer.Handle,
-                                Offset = sizeof(float) * 2
-                            } 
+                            }
                         };
 
                         BindGPUGraphicsPipeline(pass, _pipeline.Handle);
