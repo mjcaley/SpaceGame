@@ -3,6 +3,7 @@ using SpaceGame.Core.Components;
 using Flecs.NET;
 using Flecs.NET.Bindings;
 using Flecs.NET.Core;
+using System.Numerics;
 using SDL3;
 using static SDL3.SDL;
 
@@ -13,16 +14,32 @@ public class Game(IRenderer renderer)
     public World World { get; private set; } = World.Create();
     private RenderSystem renderSystem = new(renderer);
 
+    private void AddMockEntities()
+    {
+        World.Entity("Player")
+            .Add<Transform>()
+            .Add<Sprite>()
+            .Set(new Transform { Position = new Vector2(100, 100) })
+            .Set(new Sprite { Texture = "player_texture", Layer = Layer.Foreground, Size = new Vector2(1, 1) });
+        World.Entity("Enemy")
+            .Add<Transform>()
+            .Add<Sprite>()
+            .Set(new Transform { Position = new Vector2(100, 100) })
+            .Set(new Sprite { Texture = "player_texture", Layer = Layer.Foreground, Size = new Vector2(1, 1) });
+    }
+
     private void Setup()
     {
+        AddMockEntities();
 
+        World.System("Clear sprite batch")
+            .Kind(Ecs.PreUpdate)
+            .Iter((Iter it) => renderSystem.Clear());
 
-        World.System("Renderer")
-            .Kind(Ecs.PostFrame)
-            .Iter(() =>
+        World.System<Transform, Sprite>("Batch sprites")
+            .Each((Iter it, int i, ref Transform t, ref Sprite s) =>
             {
-                Console.WriteLine("renderer");
-                renderSystem.Process();
+                renderSystem.Add(t, s);
             });
 
         World.System("Frame timer")
@@ -31,6 +48,13 @@ public class Game(IRenderer renderer)
             {
                 Console.WriteLine("timer");
                 Console.WriteLine($"Delta time is {it.DeltaTime()}");
+            });
+
+        World.System("Draw")
+            .Kind(Ecs.PostFrame)
+            .Iter(() =>
+            {
+                renderSystem.Draw();
             });
 
         World.SetTargetFps(60);

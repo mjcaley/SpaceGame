@@ -5,13 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Numerics;
 using System.Drawing;
+using SpaceGame.Infrastructure;
 
 namespace SpaceGame.Core.Components
 {
     public class Sprite
     {
-        string Texture { get; set; }
-        string Layer { get; set; }
-        Vector2 Size { get; set; }
+        public string Texture { get; set; }
+        public Layer Layer { get; set; }
+        public Vector2 Size { get; set; }
     }
 }

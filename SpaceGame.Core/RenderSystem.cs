@@ -1,4 +1,5 @@
-﻿using SpaceGame.Infrastructure;
+﻿using SpaceGame.Core.Components;
+using SpaceGame.Infrastructure;
 using System.Drawing;
 using System.Reflection.Metadata;
 using static SDL3.SDL;
@@ -73,15 +74,26 @@ namespace SpaceGame.Core
         private readonly ITransferBuffer _uploadBuffer;
         private readonly IVertexBuffer _vertexBuffer;
         private readonly IGraphicsPipeline _pipeline;
+        private readonly List<Tuple<Transform, Sprite>> _sprites = [];
 
         private unsafe void UploadVertices(nint commandBuffer, nint copyPass)
         {
+            if (_vertexBuffer.Size < sizeof(float) * _sprites.Count * 6)
+            {
+                // Reallocate buffer
+            }
+
             var mappedBufferPtr = MapGPUTransferBuffer(_renderer.GpuDevice.Handle, _uploadBuffer.Handle, false);
             if (mappedBufferPtr == nint.Zero)
             {
                 return;
             }
             float* mappedBuffer = (float*)mappedBufferPtr;
+
+            foreach (var sprite in _sprites)
+            {
+
+            }
 
             // V1
             mappedBuffer[0] = -0.5f;
@@ -153,7 +165,17 @@ namespace SpaceGame.Core
             UploadToGPUBuffer(copyPass, source, destination, false);
         }
 
-        public void Process()
+        public void Add(Transform transform, Sprite sprite)
+        {
+            _sprites.Add(Tuple.Create(transform, sprite));
+        }
+
+        public void Clear()
+        {
+            _sprites.Clear();
+        }
+
+        public void Draw()
         {
             _renderer
                 .AcquireCommandBuffer()
