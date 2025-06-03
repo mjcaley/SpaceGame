@@ -3,12 +3,12 @@ using static SDL3.SDL;
 
 namespace SpaceGame.SDLWrapper;
 
-public class TransferBuffer(IGpuDevice gpuDevice, nint handle, int size) : ITransferBuffer
+public class TransferBuffer(IGpuDevice gpuDevice, nint handle, int size, GPUTransferBufferUsage usage) : ITransferBuffer
 {
     public nint Handle { get; private set; } = handle;
     public int Size { get; private set; } = size;
 
-    public bool TryResize(int size, GPUTransferBufferUsage usage)
+    public bool TryResize(int size)
     {
         if (Size == size)
         {

@@ -19,13 +19,13 @@ public class Game(IRenderer renderer)
         World.Entity("Player")
             .Add<Transform>()
             .Add<Sprite>()
-            .Set(new Transform { Position = new Vector2(100, 100) })
-            .Set(new Sprite { Texture = "player_texture", Layer = Layer.Foreground, Size = new Vector2(1, 1) });
+            .Set(new Transform { Position = new Vector2(0.2f, 0.5f) })
+            .Set(new Sprite { Texture = "player_texture", Layer = Layer.Foreground, Size = new Vector2(0.1f, 0.1f) });
         World.Entity("Enemy")
             .Add<Transform>()
             .Add<Sprite>()
-            .Set(new Transform { Position = new Vector2(100, 100) })
-            .Set(new Sprite { Texture = "player_texture", Layer = Layer.Foreground, Size = new Vector2(1, 1) });
+            .Set(new Transform { Position = new Vector2(0.6f, 0.5f) })
+            .Set(new Sprite { Texture = "player_texture", Layer = Layer.Foreground, Size = new Vector2(0.1f, 0.1f) });
     }
 
     private void Setup()

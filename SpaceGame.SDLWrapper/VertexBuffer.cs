@@ -12,7 +12,7 @@ namespace SpaceGame.SDLWrapper
             Size = size;
         }
 
-        public VertexBuffer(GpuDevice gpuDevice, int size)
+        public VertexBuffer(IGpuDevice gpuDevice, int size)
         {
             _gpuDevice = gpuDevice;
 
@@ -28,13 +28,13 @@ namespace SpaceGame.SDLWrapper
             Size = size;
         }
 
-        private IGpuDevice _gpuDevice;
+        private readonly IGpuDevice _gpuDevice;
         public nint Handle { get; private set; }
         public int Size { get; private set; }
 
-        public bool TryResize(int size, GPUTransferBufferUsage usage)
+        public bool TryResize(int size)
         {
-            if (Size == size)
+            if (Size >= size)
             {
                 return true;
             }

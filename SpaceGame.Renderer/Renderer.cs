@@ -105,7 +105,7 @@ public class Renderer : IRenderer, IDisposable
             throw new NullReferenceException("Transfer buffer is null pointer");
         }
 
-        return new TransferBuffer(_gpuDevice, transferBuffer, size);
+        return new TransferBuffer(_gpuDevice, transferBuffer, size, usage);
     }
 
     public IVertexBuffer CreateVertexBuffer(int size)

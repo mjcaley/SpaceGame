@@ -4,5 +4,5 @@ public interface IVertexBuffer : IDisposable
 {
     public nint Handle { get; }
     public int Size { get; }
-    public int Capacity { get; }
+    public bool TryResize(int size);
 }

@@ -1,17 +1,26 @@
 ﻿using SpaceGame.Core.Components;
 using SpaceGame.Infrastructure;
 using System.Drawing;
+using System.Numerics;
 using System.Reflection.Metadata;
+using System.Runtime.InteropServices;
 using static SDL3.SDL;
 
 namespace SpaceGame.Core
 {
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct ColouredVertex
+    {
+        public Vector2 Vertex;
+        public Vector4 Colour;
+    }
+    
     public class RenderSystem : IDisposable
     {
         public RenderSystem(IRenderer renderer)
         {
-            _uploadBuffer = renderer.CreateTransferBuffer(sizeof(float) * 36, GPUTransferBufferUsage.Upload);
-            _vertexBuffer = renderer.CreateVertexBuffer(sizeof(float) * 36);
+            _uploadBuffer = renderer.CreateTransferBuffer(sizeof(float) * 6 * 6 * 2, GPUTransferBufferUsage.Upload);
+            _vertexBuffer = renderer.CreateVertexBuffer(sizeof(float) * 6 * 6 * 2);
 
             _renderer = renderer;
             var vertexShaderInfo = default(ShaderCreateInfo);
@@ -78,9 +87,10 @@ namespace SpaceGame.Core
 
         private unsafe void UploadVertices(nint commandBuffer, nint copyPass)
         {
-            if (_vertexBuffer.Size < sizeof(float) * _sprites.Count * 6)
+            var vertexSize = sizeof(float) * 6 * 6 * _sprites.Count;
+            if (!_vertexBuffer.TryResize(vertexSize) || !_uploadBuffer.TryResize(vertexSize))
             {
-                // Reallocate buffer
+                return;
             }
 
             var mappedBufferPtr = MapGPUTransferBuffer(_renderer.GpuDevice.Handle, _uploadBuffer.Handle, false);
@@ -88,66 +98,33 @@ namespace SpaceGame.Core
             {
                 return;
             }
-            float* mappedBuffer = (float*)mappedBufferPtr;
+            var mappedBuffer = (ColouredVertex*)mappedBufferPtr;
 
-            foreach (var sprite in _sprites)
+            //int screenWidth = GetWindow
+            int bufferIndex = 0;
+            foreach (var entity in _sprites)
             {
-
+                var transform = entity.Item1;
+                var sprite = entity.Item2;
+                
+                mappedBuffer[bufferIndex].Vertex = transform.Position;
+                mappedBuffer[bufferIndex++].Colour = new Vector4(0f, 1f, 0f, 1f);
+                
+                mappedBuffer[bufferIndex].Vertex = transform.Position + sprite.Size;
+                mappedBuffer[bufferIndex++].Colour = new Vector4(0f, 1f, 0f, 1f);
+                
+                mappedBuffer[bufferIndex].Vertex = transform.Position with { X = transform.Position.X + sprite.Size.X };
+                mappedBuffer[bufferIndex++].Colour = new Vector4(0f, 1f, 0f, 1f);
+                
+                mappedBuffer[bufferIndex].Vertex = transform.Position;
+                mappedBuffer[bufferIndex++].Colour = new Vector4(0f, 1f, 0f, 1f);
+                
+                mappedBuffer[bufferIndex].Vertex = transform.Position with { Y = transform.Position.Y + sprite.Size.Y };
+                mappedBuffer[bufferIndex++].Colour = new Vector4(0f, 1f, 0f, 1f);
+                
+                mappedBuffer[bufferIndex].Vertex = transform.Position + sprite.Size;
+                mappedBuffer[bufferIndex++].Colour = new Vector4(0f, 1f, 0f, 1f);
             }
-
-            // V1
-            mappedBuffer[0] = -0.5f;
-            mappedBuffer[1] = -0.5f;
-
-            mappedBuffer[2] = 1f;
-            mappedBuffer[3] = 0f;
-            mappedBuffer[4] = 0f;
-            mappedBuffer[5] = 1.0f;
-
-            // V2
-            mappedBuffer[6] = 0.5f;
-            mappedBuffer[7] = 0.5f;
-
-            mappedBuffer[8] = 0f;
-            mappedBuffer[9] = 1f;
-            mappedBuffer[10] = 0f;
-            mappedBuffer[11] = 1.0f;
-
-            // V3
-            mappedBuffer[12] = -0.5f;
-            mappedBuffer[13] = 0.5f;
-
-            mappedBuffer[14] = 0f;
-            mappedBuffer[15] = 0f;
-            mappedBuffer[16] = 1f;
-            mappedBuffer[17] = 1.0f;
-
-            // V4
-            mappedBuffer[18] = -0.5f;
-            mappedBuffer[19] = -0.5f;
-
-            mappedBuffer[20] = 1f;
-            mappedBuffer[21] = 0f;
-            mappedBuffer[22] = 0f;
-            mappedBuffer[23] = 1.0f;
-
-            // V5
-            mappedBuffer[24] = 0.5f;
-            mappedBuffer[25] = -0.5f;
-
-            mappedBuffer[26] = 0f;
-            mappedBuffer[27] = 0f;
-            mappedBuffer[28] = 1f;
-            mappedBuffer[29] = 1.0f;
-
-            // V6
-            mappedBuffer[30] = 0.5f;
-            mappedBuffer[31] = 0.5f;
-
-            mappedBuffer[32] = 0f;
-            mappedBuffer[33] = 1f;
-            mappedBuffer[34] = 0f;
-            mappedBuffer[35] = 1.0f;
 
             UnmapGPUTransferBuffer(_renderer.GpuDevice.Handle, _uploadBuffer.Handle);
 
@@ -160,7 +137,7 @@ namespace SpaceGame.Core
             {
                 Buffer = _vertexBuffer.Handle,
                 Offset = 0,
-                Size = sizeof(float) * 36
+                Size = (uint)(sizeof(float) * 6 * 6 * _sprites.Count)
             };
             UploadToGPUBuffer(copyPass, source, destination, false);
         }
@@ -209,7 +186,7 @@ namespace SpaceGame.Core
 
                         BindGPUGraphicsPipeline(pass, _pipeline.Handle);
                         BindGPUVertexBuffers(pass, 0, bufferBinding, (uint)bufferBinding.Length);
-                        DrawGPUPrimitives(pass, 6, 1, 0, 0);
+                        DrawGPUPrimitives(pass, (uint)(6 * _sprites.Count), (uint)_sprites.Count, 0, 0);
                     })
                 .Submit();
         }
