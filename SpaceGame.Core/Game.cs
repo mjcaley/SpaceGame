@@ -32,6 +32,21 @@ public class Game(IRenderer renderer)
     {
         AddMockEntities();
 
+        World.System("Input")
+            .Iter((Iter it) =>
+            {
+                while (PollEvent(out var @event))
+                {
+                    switch (@event.Type)
+                    {
+                        case (uint)EventType.KeyDown:
+                            if (@event.Key.Scancode == Scancode.Escape)
+                                World.Quit();
+                            break;
+                    }
+                }
+            });
+        
         World.System("Clear sprite batch")
             .Kind(Ecs.PreUpdate)
             .Iter((Iter it) => renderSystem.Clear());
