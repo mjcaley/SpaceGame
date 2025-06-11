@@ -3,7 +3,7 @@ using static SDL3.SDL;
 
 namespace SpaceGame.SDLWrapper;
 
-public class CommandBuffer(nint commandBufferHandle, nint windowHandle)
+public class CommandBuffer(nint commandBufferHandle)
 {
     public nint CommandBufferHandle { get; private set; } = commandBufferHandle;
 
@@ -21,7 +21,7 @@ public class CommandBuffer(nint commandBufferHandle, nint windowHandle)
         CommandBufferHandle = nint.Zero;
     }
 
-    public CommandBufferWithSwapchain AcquireSwapchainTexture()
+    public CommandBufferWithSwapchain AcquireSwapchainTexture(nint windowHandle)
     {
         var swapchainResult = WaitAndAcquireGPUSwapchainTexture(
             CommandBufferHandle,
@@ -78,7 +78,7 @@ public class CommandBuffer(nint commandBufferHandle, nint windowHandle)
     {
         var renderPass = BeginGPURenderPass(
             CommandBufferHandle,
-            StructureArrayToPointer<GPUColorTargetInfo>(colorTargetInfo),
+            StructureArrayToPointer(colorTargetInfo),
             (uint)colorTargetInfo.Length,
             nint.Zero);
         if (renderPass == nint.Zero)

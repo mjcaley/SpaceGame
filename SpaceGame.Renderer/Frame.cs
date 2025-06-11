@@ -48,12 +48,12 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
         .WithRenderPass((cmd, pass) =>
         {
             var bufferBinding = new[] {
-                            new GPUBufferBinding
-                            {
-                                Buffer = vertexBuffer.Handle,
-                                Offset = 0
-                            }
-                        };
+                new GPUBufferBinding
+                {
+                    Buffer = vertexBuffer.Handle,
+                    Offset = 0
+                }
+            };
 
             BindGPUGraphicsPipeline(pass, renderer.RectanglePipeline.Pipeline.Handle);
             BindGPUVertexBuffers(pass, 0, bufferBinding, (uint)bufferBinding.Length);

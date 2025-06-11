@@ -3,7 +3,7 @@ using static SDL3.SDL;
 
 namespace SpaceGame.SDLWrapper;
 
-public class TransferBuffer(IGpuDevice gpuDevice, nint handle, int size, GPUTransferBufferUsage usage) : ITransferBuffer
+public class TransferBuffer(IGpuDevice gpuDevice, nint handle, int size, GPUTransferBufferUsage usage) : IDisposable
 {
     public nint Handle { get; private set; } = handle;
     public int Size { get; private set; } = size;

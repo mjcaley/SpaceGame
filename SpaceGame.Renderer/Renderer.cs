@@ -24,7 +24,7 @@ public class Renderer : IRenderer, IDisposable
 
     public IFrame BeginFrame() => new Frame(
         AcquireCommandBuffer()
-        .AcquireSwapchainTexture()
+        .AcquireSwapchainTexture(_window.Handle)
         .Update(cmd =>
             cmd.ColorTargetInfo = [
                 new()
@@ -116,7 +116,7 @@ public class Renderer : IRenderer, IDisposable
             throw new NullReferenceException("Command buffer is null pointer");
         }
 
-        return new CommandBuffer(commandBuffer, _window.Handle);
+        return new CommandBuffer(commandBuffer);
     }
 
     private TransferBuffer CreateTransferBuffer(int size, GPUTransferBufferUsage usage)
