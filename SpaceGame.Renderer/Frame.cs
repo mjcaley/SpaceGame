@@ -43,7 +43,7 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
                 Offset = 0,
                 Size = (uint)size
             };
-            UploadToGPUBuffer(pass, source, destination, false);
+            UploadToGPUBuffer(pass.Handle, source, destination, false);
         })
         .WithRenderPass((cmd, pass) =>
         {
@@ -55,9 +55,9 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
                 }
             };
 
-            BindGPUGraphicsPipeline(pass, renderer.RectanglePipeline.Pipeline.Handle);
-            BindGPUVertexBuffers(pass, 0, bufferBinding, (uint)bufferBinding.Length);
-            DrawGPUPrimitives(pass, (uint)size, 1, 0, 0);
+            BindGPUGraphicsPipeline(pass.Handle, renderer.RectanglePipeline.Pipeline.Handle);
+            BindGPUVertexBuffers(pass.Handle, 0, bufferBinding, (uint)bufferBinding.Length);
+            DrawGPUPrimitives(pass.Handle, (uint)size, 1, 0, 0);
         });
     }
 

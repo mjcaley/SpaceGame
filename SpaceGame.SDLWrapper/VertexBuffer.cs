@@ -71,7 +71,7 @@ namespace SpaceGame.SDLWrapper
                     Buffer = newHandle
                 };
 
-                CopyGPUBufferToBuffer(pass, src, dest, (uint)Size, true);
+                CopyGPUBufferToBuffer(pass.Handle, src, dest, (uint)Size, true);
             })
             .Submit();
 

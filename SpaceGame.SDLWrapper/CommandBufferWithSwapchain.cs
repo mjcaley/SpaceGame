@@ -22,17 +22,18 @@ public class CommandBufferWithSwapchain(nint commandBufferHandle, nint swapchain
         CommandBufferHandle = nint.Zero;
     }
 
-    public CommandBufferWithSwapchain WithCopyPass(Action<nint, nint> func)
+    public CommandBufferWithSwapchain WithCopyPass(Action<CommandBufferWithSwapchain, CopyPass> func)
     {
-        var copyPass = BeginGPUCopyPass(CommandBufferHandle);
-        if (copyPass == nint.Zero)
+        var copyPassHandle = BeginGPUCopyPass(CommandBufferHandle);
+        if (copyPassHandle == nint.Zero)
         {
             return this;
         }
+        var copyPass = new CopyPass(copyPassHandle);
 
-        func(CommandBufferHandle, copyPass);
+        func(this, copyPass);
 
-        EndGPUCopyPass(copyPass);
+        EndGPUCopyPass(copyPass.Handle);
 
         return this;
     }
@@ -43,21 +44,22 @@ public class CommandBufferWithSwapchain(nint commandBufferHandle, nint swapchain
 
         return this;
     }
-    public CommandBufferWithSwapchain WithRenderPass(Action<nint, nint> func)
+    public CommandBufferWithSwapchain WithRenderPass(Action<CommandBufferWithSwapchain, RenderPass> func)
     {
-        var renderPass = BeginGPURenderPass(
+        var renderPassHandle = BeginGPURenderPass(
             CommandBufferHandle,
             StructureArrayToPointer(ColorTargetInfo),
             (uint)ColorTargetInfo.Length,
             nint.Zero);
-        if (renderPass == nint.Zero)
+        if (renderPassHandle == nint.Zero)
         {
             return this;
         }
+        var renderPass = new RenderPass(renderPassHandle);
 
-        func(CommandBufferHandle, renderPass);
+        func(this, renderPass);
 
-        EndGPURenderPass(renderPass);
+        EndGPURenderPass(renderPass.Handle);
 
         return this;
     }
