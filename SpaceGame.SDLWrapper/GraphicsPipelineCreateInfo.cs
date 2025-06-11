@@ -1,17 +1,12 @@
-﻿using static SDL3.SDL;
+﻿using SpaceGame.Renderer;
+using static SDL3.SDL;
 
 namespace SpaceGame.SDLWrapper;
 
-public struct GraphicsPipelineCreateInfo
+public struct GraphicsPipelineCreateInfo(VertexShader vertexShader, FragmentShader fragmentShader)
 {
-    public GraphicsPipelineCreateInfo(IShader vertexShader, IShader fragmentShader)
-    {
-        VertexShader = vertexShader;
-        FragmentShader = fragmentShader;
-    }
-
-    public IShader VertexShader { get; set; }
-    public IShader FragmentShader { get; set; }
+    public VertexShader VertexShader { get; set; } = vertexShader;
+    public FragmentShader FragmentShader { get; set; } = fragmentShader;
     public VertexInputState VertexInputState { get; set; } = new();
     public GPUPrimitiveType PrimitiveType { get; set; } = default;
     public GPURasterizerState RasterizerState { get; set; } = default;

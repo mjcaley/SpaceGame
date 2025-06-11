@@ -18,14 +18,14 @@ public class Game(IRenderer renderer)
     {
         World.Entity("Player")
             .Add<Transform>()
-            .Add<Sprite>()
+            .Add<Components.Rectangle>()
             .Set(new Transform { Position = new Vector2(0.2f, 0.5f) })
-            .Set(new Sprite { Texture = "player_texture", Layer = Layer.Foreground, Size = new Vector2(0.1f, 0.1f) });
+            .Set(new Components.Rectangle { Layer = Layer.Foreground, Colour = new Vector4(1.0f, 0f, 0f, 1.0f), Size = new Vector2(0.1f, 0.1f) });
         World.Entity("Enemy")
             .Add<Transform>()
-            .Add<Sprite>()
+            .Add<Components.Rectangle>()
             .Set(new Transform { Position = new Vector2(0.6f, 0.5f) })
-            .Set(new Sprite { Texture = "player_texture", Layer = Layer.Foreground, Size = new Vector2(0.1f, 0.1f) });
+            .Set(new Components.Rectangle { Layer = Layer.Foreground, Colour = new Vector4(1.0f, 0f, 0f, 1.0f), Size = new Vector2(0.1f, 0.1f) });
     }
 
     private void Setup()
@@ -51,8 +51,8 @@ public class Game(IRenderer renderer)
             .Kind(Ecs.PreUpdate)
             .Iter((Iter it) => renderSystem.Clear());
 
-        World.System<Transform, Sprite>("Batch sprites")
-            .Each((Iter it, int i, ref Transform t, ref Sprite s) =>
+        World.System<Transform, Components.Rectangle>("Batch sprites")
+            .Each((Iter it, int i, ref Transform t, ref Components.Rectangle s) =>
             {
                 renderSystem.Add(t, s);
             });

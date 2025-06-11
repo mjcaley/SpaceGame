@@ -8,26 +8,93 @@ namespace SpaceGame.Renderer;
 
 public class Renderer : IRenderer, IDisposable
 {
-    public Renderer(Window window, GpuDevice gpuDevice)
+    public Renderer(IWindow window, IGpuDevice gpuDevice)
     {
         _window = window;
         _gpuDevice = gpuDevice;
+        InitPipelines();
     }
 
-    private Window _window;
-    private GpuDevice _gpuDevice;
-    
-    private TransferBuffer _transferBuffer;
-    private VertexBuffer _vertexBuffer;
-    private GraphicsPipeline _shapePipeline;
+    private IWindow _window;
+    private IGpuDevice _gpuDevice;
+
+    public IWindow Window => _window;
+    public IGpuDevice GpuDevice => _gpuDevice;
+
+    private RectanglePipeline _rectanglePipeline;
+    public RectanglePipeline RectanglePipeline => _rectanglePipeline;
+
+    public IFrame BeginFrame() => new Frame(AcquireCommandBuffer().AcquireSwapchainTexture(), this);
 
     private bool disposedValue;
 
-
-    public IFrame BeginFrame()
+    private void InitPipelines()
     {
-        var commandBuffer = AcquireCommandBuffer().AcquireSwapchainTexture();
-        return new Frame(commandBuffer, this);
+        using var rectVertexShader = new VertexShader(
+            GpuDevice.Handle,
+            CreateGPUShader(GpuDevice.Handle, new ShaderCreateInfo(
+                Assets.Shaders.QuadVertex.Spirv,
+                "main",
+                GPUShaderFormat.SPIRV,
+                GPUShaderStage.Vertex
+            ).ToSDL()
+        ));
+        using var rectFragmentShader = new FragmentShader(
+            GpuDevice.Handle,
+            CreateGPUShader(GpuDevice.Handle, new ShaderCreateInfo(
+                Assets.Shaders.QuadFragment.Spirv,
+                "main",
+                GPUShaderFormat.SPIRV,
+                GPUShaderStage.Fragment
+            ).ToSDL()
+        ));
+        var pipelineHandle = CreateGPUGraphicsPipeline(GpuDevice.Handle, new GraphicsPipelineCreateInfo()
+        {
+            VertexShader = rectVertexShader,
+            FragmentShader = rectFragmentShader,
+            VertexInputState = new()
+            {
+                VertexBufferDescriptions = [
+                        new GPUVertexBufferDescription() {
+                            Slot = 0,
+                            Pitch = sizeof(float) * 6,
+                            InputRate = GPUVertexInputRate.Vertex,
+                            InstanceStepRate = 0
+                        }],
+                VertexAttributes = [
+                        new GPUVertexAttribute()
+                        {
+                            Location = 0,
+                            BufferSlot = 0,
+                            Format = GPUVertexElementFormat.Float2,
+                            Offset = 0
+                        },
+                        new GPUVertexAttribute()
+                        {
+                            Location = 1,
+                            BufferSlot = 0,
+                            Format = GPUVertexElementFormat.Float4,
+                            Offset = sizeof(float) * 2
+                        },
+                    ]
+            },
+            PrimitiveType = GPUPrimitiveType.TriangleList,
+            TargetInfo = new()
+            {
+                ColorTargetDescriptions = [
+                        new()
+                        {
+                            Format=GetGPUSwapchainTextureFormat(GpuDevice.Handle, Window.Handle),
+                        }
+                    ]
+            }
+        }.ToSDL());
+
+        _rectanglePipeline = new RectanglePipeline(
+            new GraphicsPipeline(GpuDevice, pipelineHandle),
+            CreateTransferBuffer(sizeof(float) * 6, GPUTransferBufferUsage.Upload),
+            CreateVertexBuffer(sizeof(float) * 6 * 4)
+        );
     }
 
     private CommandBuffer AcquireCommandBuffer()
@@ -40,40 +107,8 @@ public class Renderer : IRenderer, IDisposable
 
         return new CommandBuffer(commandBuffer, _window.Handle);
     }
-    
-    // private void AllocateBuffers()
-    // {
-    //     ReleaseGPUTransferBuffer(_gpuDevice.Handle, _transferBuffer);
-    //     ReleaseGPUBuffer(_gpuDevice.Handle, _vertexBuffer);
-    //
-    //     var size = Size(_sprites);
-    //
-    //     GPUTransferBufferCreateInfo transferCreateInfo = new()
-    //     {
-    //         Usage = GPUTransferBufferUsage.Upload,
-    //         Size = size
-    //     };
-    //     _transferBuffer = CreateGPUTransferBuffer(_gpuDevice.Handle, in transferCreateInfo);
-    //     if (_transferBuffer == nint.Zero)
-    //     {
-    //         return;
-    //     }
-    //     _transferBufferSize = size;
-    //
-    //     GPUBufferCreateInfo vertexCreateInfo = new()
-    //     {
-    //         Usage = GPUBufferUsageFlags.Vertex,
-    //         Size = size
-    //     };
-    //     _vertexBuffer = CreateGPUBuffer(_gpuDevice.Handle, in vertexCreateInfo);
-    //     if (_vertexBuffer == nint.Zero)
-    //     {
-    //         return;
-    //     }
-    //     _vertexBufferSize = size;
-    // }
 
-    public ITransferBuffer CreateTransferBuffer(int size, GPUTransferBufferUsage usage)
+    private TransferBuffer CreateTransferBuffer(int size, GPUTransferBufferUsage usage)
     {
         var transferBuffer = CreateGPUTransferBuffer(_gpuDevice.Handle, new()
         {
@@ -89,12 +124,7 @@ public class Renderer : IRenderer, IDisposable
         return new TransferBuffer(_gpuDevice, transferBuffer, size, usage);
     }
 
-    public TransferBuffer GetTransferBuffer()
-    {
-        return _transferBuffer;
-    }
-
-    public IVertexBuffer CreateVertexBuffer(int size)
+    private VertexBuffer CreateVertexBuffer(int size)
     {
         var vertexBuffer = CreateGPUBuffer(_gpuDevice.Handle, new()
         {
@@ -104,113 +134,10 @@ public class Renderer : IRenderer, IDisposable
 
         if (vertexBuffer == nint.Zero)
         {
-            throw new NullReferenceException("Vertex buffer is null pointer");
+            throw new NullReferenceException("Transfer buffer is null pointer");
         }
-
 
         return new VertexBuffer(_gpuDevice, vertexBuffer, size);
-    }
-
-    public GraphicsPipeline CreatePipeline(ref GraphicsPipelineCreateInfo pipelineCreateInfo)
-    {
-        var pipeline = CreateGPUGraphicsPipeline(_gpuDevice.Handle, pipelineCreateInfo.ToSDL());
-        if (pipeline == nint.Zero)
-        {
-            Console.WriteLine($"Failed to create graphics pipeline: {GetError()}");
-            throw new NullReferenceException("Graphics pipeline is null pointer");
-        }
-
-        return new GraphicsPipeline(_gpuDevice, pipeline);
-    }
-
-    private unsafe void Upload(nint commandBuffer)
-    {
-        var size = Size(_sprites);
-        if (size > _transferBufferSize || size > _vertexBufferSize)
-        {
-            AllocateBuffers();
-        }
-
-        var mappedBufferPtr = MapGPUTransferBuffer(_gpuDevice.Handle, _transferBuffer, false);
-        if (mappedBufferPtr == nint.Zero)
-        {
-            return;
-        }
-        float* mappedBuffer = (float*)mappedBufferPtr;
-        var bufferIndex = 0;
-        foreach(var sprite in _sprites)
-        {
-            foreach (var vertex in sprite.Vertices())
-            {
-                mappedBuffer[bufferIndex++] = (float)vertex.X;
-                mappedBuffer[bufferIndex++] = (float)vertex.Y;
-            }
-            mappedBuffer[bufferIndex++] = (float)sprite.Colour.X;
-            mappedBuffer[bufferIndex++] = (float)sprite.Colour.Y;
-            mappedBuffer[bufferIndex++] = (float)sprite.Colour.Z;
-            mappedBuffer[bufferIndex++] = (float)sprite.Colour.W;
-        }
-        UnmapGPUTransferBuffer(_gpuDevice.Handle, _transferBuffer);
-
-        var copyPass = BeginGPUCopyPass(commandBuffer);
-        if (copyPass == nint.Zero)
-        {
-            return;
-        }
-
-        GPUTransferBufferLocation source = new()
-        {
-            TransferBuffer = _transferBuffer,
-            Offset = 0,
-        };
-        GPUBufferRegion destination = new()
-        {
-            Buffer=_vertexBuffer,
-            Offset=0,
-            Size=size
-        };
-        UploadToGPUBuffer(copyPass, source, destination, false);
-
-        EndGPUCopyPass(copyPass);
-    }
-
-    public void Draw()
-    {
-        var commandBuffer = AcquireGPUCommandBuffer(_gpuDevice.Handle);
-        if (commandBuffer == nint.Zero)
-        {
-            return;
-        }
-
-        Upload(commandBuffer);
-
-        var swapchainSuccess = WaitAndAcquireGPUSwapchainTexture(commandBuffer, _window.Handle, out var swapchainTexture, out var swapchainTextureWidth, out var swapchainTextureHeight);
-        if (!swapchainSuccess)
-        {
-            CancelGPUCommandBuffer(commandBuffer);
-            return;
-        }
-
-        var colorTargetInfo = new GPUColorTargetInfo
-        {
-            Texture=swapchainTexture,
-            ClearColor=new FColor { R=1.0f, G=0, B=0, A=1.0f },
-            LoadOp=GPULoadOp.Clear,
-            StoreOp=GPUStoreOp.Store
-        };
-
-        var renderPass = BeginGPURenderPass(commandBuffer, StructureToPointer<GPUColorTargetInfo>(colorTargetInfo), 1, 0);
-
-        GPUBufferBinding binding = new()
-        {
-            Buffer=_vertexBuffer,
-            Offset=0,
-        };
-        BindGPUVertexBuffers(renderPass, 0, StructureToPointer<GPUBufferBinding>(binding) ,1);
-        
-        EndGPURenderPass(renderPass);
-
-        SubmitGPUCommandBuffer(commandBuffer);
     }
 
     protected virtual void Dispose(bool disposing)
@@ -222,8 +149,7 @@ public class Renderer : IRenderer, IDisposable
                 // TODO: dispose managed state (managed objects)
             }
 
-            ReleaseGPUTransferBuffer(_gpuDevice.Handle, _transferBuffer);
-            ReleaseGPUBuffer(_gpuDevice.Handle, _vertexBuffer);
+            RectanglePipeline?.Dispose();
             disposedValue = true;
         }
     }
@@ -240,16 +166,5 @@ public class Renderer : IRenderer, IDisposable
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
-    }
-
-    public IShader CreateShader(ref ShaderCreateInfo shaderCreateInfo)
-    {
-        var shader = CreateGPUShader(_gpuDevice.Handle, shaderCreateInfo.ToSDL());
-        if (shader == nint.Zero)
-        {
-            throw new NullReferenceException("Shader returned null pointer");
-        }
-
-        return new Shader(_gpuDevice, shader);
     }
 }
