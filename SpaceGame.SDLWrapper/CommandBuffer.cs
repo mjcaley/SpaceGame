@@ -1,12 +1,11 @@
 using SpaceGame.Infrastructure;
 using static SDL3.SDL;
 
-namespace SpaceGame.Renderer;
+namespace SpaceGame.SDLWrapper;
 
-public class CommandBuffer(IRenderer Renderer, nint CommandBufferHandle, nint windowHandle) : ICommandBuffer
+public class CommandBuffer(nint commandBufferHandle, nint windowHandle)
 {
-    public IRenderer Renderer { get; } = Renderer;
-    public nint CommandBufferHandle { get; private set; } = CommandBufferHandle;
+    public nint CommandBufferHandle { get; private set; } = commandBufferHandle;
 
     public nint? SwapchainTexture { get; private set; }
     
@@ -22,7 +21,7 @@ public class CommandBuffer(IRenderer Renderer, nint CommandBufferHandle, nint wi
         CommandBufferHandle = nint.Zero;
     }
 
-    public ICommandBufferWithSwapchain AcquireSwapchainTexture()
+    public CommandBufferWithSwapchain AcquireSwapchainTexture()
     {
         var swapchainResult = WaitAndAcquireGPUSwapchainTexture(
             CommandBufferHandle,
@@ -38,10 +37,10 @@ public class CommandBuffer(IRenderer Renderer, nint CommandBufferHandle, nint wi
         
         // TODO: Save width and height
 
-        return new CommandBufferWithSwapchain(Renderer, CommandBufferHandle, swapchainTexture);
+        return new CommandBufferWithSwapchain(CommandBufferHandle, swapchainTexture);
     }
 
-    public ICommandBuffer WithCopyPass(Action<nint, nint> func)
+    public CommandBuffer WithCopyPass(Action<nint, nint> func)
     {
         var copyPass = BeginGPUCopyPass(CommandBufferHandle);
         if (copyPass == nint.Zero)
@@ -56,7 +55,7 @@ public class CommandBuffer(IRenderer Renderer, nint CommandBufferHandle, nint wi
         return this;
     }
     
-    public ICommandBuffer WithRenderPass(GPUColorTargetInfo colorTargetInfo, Action<nint, nint> func)
+    public CommandBuffer WithRenderPass(GPUColorTargetInfo colorTargetInfo, Action<nint, nint> func)
     {
         var renderPass = BeginGPURenderPass(
             CommandBufferHandle,
@@ -75,7 +74,7 @@ public class CommandBuffer(IRenderer Renderer, nint CommandBufferHandle, nint wi
         return this;
     }
 
-    public ICommandBuffer WithRenderPass(GPUColorTargetInfo[] colorTargetInfo, Action<nint, nint> func)
+    public CommandBuffer WithRenderPass(GPUColorTargetInfo[] colorTargetInfo, Action<nint, nint> func)
     {
         var renderPass = BeginGPURenderPass(
             CommandBufferHandle,

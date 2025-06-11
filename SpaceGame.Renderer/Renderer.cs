@@ -1,4 +1,5 @@
-﻿using SDL3;
+﻿using System.Numerics;
+using SDL3;
 using SpaceGame.Infrastructure;
 using SpaceGame.SDLWrapper;
 using static SDL3.SDL;
@@ -7,32 +8,29 @@ namespace SpaceGame.Renderer;
 
 public class Renderer : IRenderer, IDisposable
 {
-    public Renderer(IWindow window, IGpuDevice gpuDevice)
+    public Renderer(Window window, GpuDevice gpuDevice)
     {
         _window = window;
         _gpuDevice = gpuDevice;
     }
 
-    private IWindow _window;
-    private IGpuDevice _gpuDevice;
+    private Window _window;
+    private GpuDevice _gpuDevice;
     
-    private nint _transferBuffer = nint.Zero;
-    private uint _transferBufferSize = 0;
-    private nint _vertexBuffer = nint.Zero;
-    private uint _vertexBufferSize = 0;
+    private TransferBuffer _transferBuffer;
+    private VertexBuffer _vertexBuffer;
+    private GraphicsPipeline _shapePipeline;
 
-    private List<Sprite> _sprites = [];
     private bool disposedValue;
 
-    public IGpuDevice GpuDevice => _gpuDevice;
-    public IWindow Window => _window;
 
-    public SpritePipeline CreateSpritePipeline(VertexShader vertexShader, FragmentShader fragmentShader)
+    public IFrame BeginFrame()
     {
-        return new SpritePipeline(_gpuDevice.Handle, 0);
+        var commandBuffer = AcquireCommandBuffer().AcquireSwapchainTexture();
+        return new Frame(commandBuffer, this);
     }
 
-    public ICommandBuffer AcquireCommandBuffer()
+    private CommandBuffer AcquireCommandBuffer()
     {
         var commandBuffer = AcquireGPUCommandBuffer(_gpuDevice.Handle);
         if (commandBuffer == nint.Zero)
@@ -40,57 +38,40 @@ public class Renderer : IRenderer, IDisposable
             throw new NullReferenceException("Command buffer is null pointer");
         }
 
-        return new CommandBuffer(this, commandBuffer, _window.Handle);
+        return new CommandBuffer(commandBuffer, _window.Handle);
     }
     
-    private static uint Size(List<Sprite> sprites)
-    {
-        var vertices = sizeof(float) * 2 * 6;
-        var colour = sizeof(float) * 4;
-        return (uint)(sprites.Count * (vertices + colour));
-    }
-
-    public void Add(Sprite sprite)
-    {
-        _sprites.Add(sprite);
-    }
-
-    public void Remove(Sprite sprite)
-    {
-        _sprites.Remove(sprite);
-    }
-
-    private void AllocateBuffers()
-    {
-        ReleaseGPUTransferBuffer(_gpuDevice.Handle, _transferBuffer);
-        ReleaseGPUBuffer(_gpuDevice.Handle, _vertexBuffer);
-
-        var size = Size(_sprites);
-
-        GPUTransferBufferCreateInfo transferCreateInfo = new()
-        {
-            Usage = GPUTransferBufferUsage.Upload,
-            Size = size
-        };
-        _transferBuffer = CreateGPUTransferBuffer(_gpuDevice.Handle, in transferCreateInfo);
-        if (_transferBuffer == nint.Zero)
-        {
-            return;
-        }
-        _transferBufferSize = size;
-
-        GPUBufferCreateInfo vertexCreateInfo = new()
-        {
-            Usage = GPUBufferUsageFlags.Vertex,
-            Size = size
-        };
-        _vertexBuffer = CreateGPUBuffer(_gpuDevice.Handle, in vertexCreateInfo);
-        if (_vertexBuffer == nint.Zero)
-        {
-            return;
-        }
-        _vertexBufferSize = size;
-    }
+    // private void AllocateBuffers()
+    // {
+    //     ReleaseGPUTransferBuffer(_gpuDevice.Handle, _transferBuffer);
+    //     ReleaseGPUBuffer(_gpuDevice.Handle, _vertexBuffer);
+    //
+    //     var size = Size(_sprites);
+    //
+    //     GPUTransferBufferCreateInfo transferCreateInfo = new()
+    //     {
+    //         Usage = GPUTransferBufferUsage.Upload,
+    //         Size = size
+    //     };
+    //     _transferBuffer = CreateGPUTransferBuffer(_gpuDevice.Handle, in transferCreateInfo);
+    //     if (_transferBuffer == nint.Zero)
+    //     {
+    //         return;
+    //     }
+    //     _transferBufferSize = size;
+    //
+    //     GPUBufferCreateInfo vertexCreateInfo = new()
+    //     {
+    //         Usage = GPUBufferUsageFlags.Vertex,
+    //         Size = size
+    //     };
+    //     _vertexBuffer = CreateGPUBuffer(_gpuDevice.Handle, in vertexCreateInfo);
+    //     if (_vertexBuffer == nint.Zero)
+    //     {
+    //         return;
+    //     }
+    //     _vertexBufferSize = size;
+    // }
 
     public ITransferBuffer CreateTransferBuffer(int size, GPUTransferBufferUsage usage)
     {
@@ -106,6 +87,11 @@ public class Renderer : IRenderer, IDisposable
         }
 
         return new TransferBuffer(_gpuDevice, transferBuffer, size, usage);
+    }
+
+    public TransferBuffer GetTransferBuffer()
+    {
+        return _transferBuffer;
     }
 
     public IVertexBuffer CreateVertexBuffer(int size)
@@ -125,7 +111,7 @@ public class Renderer : IRenderer, IDisposable
         return new VertexBuffer(_gpuDevice, vertexBuffer, size);
     }
 
-    public IGraphicsPipeline CreatePipeline(ref GraphicsPipelineCreateInfo pipelineCreateInfo)
+    public GraphicsPipeline CreatePipeline(ref GraphicsPipelineCreateInfo pipelineCreateInfo)
     {
         var pipeline = CreateGPUGraphicsPipeline(_gpuDevice.Handle, pipelineCreateInfo.ToSDL());
         if (pipeline == nint.Zero)

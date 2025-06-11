@@ -1,9 +1,9 @@
 ﻿using SpaceGame.Infrastructure;
 using static SDL3.SDL;
 
-namespace SpaceGame.Renderer
+namespace SpaceGame.SDLWrapper
 {
-    public class GraphicsPipeline(IGpuDevice gpuDevice, nint handle) : IGraphicsPipeline
+    public class GraphicsPipeline(IGpuDevice gpuDevice, nint handle) : IDisposable
     {
         public nint Handle { get; private set; } = handle;
 

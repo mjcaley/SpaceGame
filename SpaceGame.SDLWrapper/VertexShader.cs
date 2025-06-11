@@ -1,7 +1,7 @@
 using SDL3;
 using static SDL3.SDL;
 
-namespace SpaceGame.Renderer;
+namespace SpaceGame.SDLWrapper;
 
 public class VertexShader(nint gpuDevice, nint handle) : IDisposable
 {

@@ -21,6 +21,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoonWorks", "submodules\Moo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoonWorks.Native", "MoonWorks.Native\MoonWorks.Native.csproj", "{B2EFF509-8C55-4722-9DC8-CAA577A5814E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{75E8FC9E-BD5A-49B4-BC8A-BF0745F19E0F}"
+	ProjectSection(SolutionItems) = preProject
+		justfile = justfile
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

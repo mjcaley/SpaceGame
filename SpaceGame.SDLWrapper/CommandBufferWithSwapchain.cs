@@ -6,14 +6,13 @@ using System.Text;
 using System.Threading.Tasks;
 using static SDL3.SDL;
 
-namespace SpaceGame.Renderer;
+namespace SpaceGame.SDLWrapper;
 
-public class CommandBufferWithSwapchain(IRenderer renderer, nint CommandBufferHandle, nint SwapchainTexture) : ICommandBufferWithSwapchain
+public class CommandBufferWithSwapchain(nint commandBufferHandle, nint swapchainTexture)
 {
-    public IRenderer Renderer { get; init; } = renderer;
-    public nint CommandBufferHandle { get; private set; } = CommandBufferHandle;
+    public nint CommandBufferHandle { get; private set; } = commandBufferHandle;
 
-    public nint SwapchainTexture { get; private set; } = SwapchainTexture;
+    public nint SwapchainTexture { get; private set; } = swapchainTexture;
 
     public GPUColorTargetInfo[] ColorTargetInfo { get; set; } = [];
 
@@ -23,7 +22,7 @@ public class CommandBufferWithSwapchain(IRenderer renderer, nint CommandBufferHa
         CommandBufferHandle = nint.Zero;
     }
 
-    public ICommandBufferWithSwapchain WithCopyPass(Action<nint, nint> func)
+    public CommandBufferWithSwapchain WithCopyPass(Action<nint, nint> func)
     {
         var copyPass = BeginGPUCopyPass(CommandBufferHandle);
         if (copyPass == nint.Zero)
@@ -38,13 +37,13 @@ public class CommandBufferWithSwapchain(IRenderer renderer, nint CommandBufferHa
         return this;
     }
 
-    public ICommandBufferWithSwapchain Update(Action<ICommandBufferWithSwapchain> func)
+    public CommandBufferWithSwapchain Update(Action<CommandBufferWithSwapchain> func)
     {
         func(this);
 
         return this;
     }
-    public ICommandBufferWithSwapchain WithRenderPass(Action<nint, nint> func)
+    public CommandBufferWithSwapchain WithRenderPass(Action<nint, nint> func)
     {
         var renderPass = BeginGPURenderPass(
             CommandBufferHandle,
