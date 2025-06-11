@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-using SDL3;
-using SpaceGame.Infrastructure;
+﻿using SpaceGame.Infrastructure;
 using SpaceGame.SDLWrapper;
 using static SDL3.SDL;
 
@@ -24,7 +22,20 @@ public class Renderer : IRenderer, IDisposable
     private RectanglePipeline _rectanglePipeline;
     public RectanglePipeline RectanglePipeline => _rectanglePipeline;
 
-    public IFrame BeginFrame() => new Frame(AcquireCommandBuffer().AcquireSwapchainTexture(), this);
+    public IFrame BeginFrame() => new Frame(
+        AcquireCommandBuffer()
+        .AcquireSwapchainTexture()
+        .Update(cmd =>
+            cmd.ColorTargetInfo = [
+                new()
+                {
+                    Texture = cmd.SwapchainTexture,
+                    ClearColor = new FColor { R = 0.5f, G = 0, B = 0.5f, A = 1.0f },
+                    LoadOp = GPULoadOp.Clear,
+                    StoreOp = GPUStoreOp.Store
+                }
+            ]
+        ), this);
 
     private bool disposedValue;
 

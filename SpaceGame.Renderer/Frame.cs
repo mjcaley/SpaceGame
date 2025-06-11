@@ -17,7 +17,7 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
 
         commandBuffer.WithCopyPass((cmd, pass) =>
         {
-            var mappedBufferPtr = MapGPUTransferBuffer(renderer.GpuDevice.Handle, uploadBuffer.Handle, false);
+            var mappedBufferPtr = MapGPUTransferBuffer(renderer.GpuDevice.Handle, uploadBuffer.Handle, true);
             if (mappedBufferPtr == nint.Zero)
             {
                 return;
