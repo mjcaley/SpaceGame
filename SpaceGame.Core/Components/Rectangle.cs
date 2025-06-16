@@ -11,7 +11,7 @@ namespace SpaceGame.Core.Components
     public class Rectangle
     {
         public Layer Layer { get; set; }
-        Tuple<int, int, int> Colour { get; set; }
-        Vector2 Size { get; set; }
+        public Vector4 Colour { get; set; }
+        public Vector2 Size { get; set; }
     }
 }

@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SpaceGame.Infrastructure;
-
-public interface IShader : IDisposable
+namespace SpaceGame.SDLWrapper
 {
-    nint Handle { get; }
+    public enum ShaderFormat
+    {
+        Spirv
+    }
 }

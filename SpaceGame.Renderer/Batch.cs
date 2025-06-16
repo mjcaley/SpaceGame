@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SpaceGame.Infrastructure;
-
-public interface IGraphicsPipeline : IDisposable
+namespace SpaceGame.Renderer
 {
-    nint Handle { get; }
+    public class Batch
+    {
+    }
 }

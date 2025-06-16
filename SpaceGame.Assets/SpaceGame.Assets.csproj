@@ -6,8 +6,23 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
-    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-      <Exec Command="slangc -g3 -entry vertexMain -o clear_vert.spv -capability spirv_1_0 -- clear.slang" />
-    </Target>
+    <ItemGroup>
+      <ProjectReference Include="..\SpaceGame.Infrastructure\SpaceGame.Infrastructure.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <None Include="res/shaders/coloured-quad.vert.spv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="res/shaders/coloured-quad.frag.spv">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="res/shaders/coloured-quad.vert.hlsl">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="res/shaders/coloured-quad.frag.hlsl">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 
 </Project>

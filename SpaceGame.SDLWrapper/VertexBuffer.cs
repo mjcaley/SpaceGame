@@ -3,7 +3,7 @@ using static SDL3.SDL;
 
 namespace SpaceGame.SDLWrapper
 {
-    public class VertexBuffer : IVertexBuffer
+    public class VertexBuffer : IDisposable
     {
         public VertexBuffer(IGpuDevice gpuDevice, nint handle, int size)
         {
@@ -52,6 +52,28 @@ namespace SpaceGame.SDLWrapper
             {
                 return false;
             }
+
+            var commandBufferHandle = AcquireGPUCommandBuffer(_gpuDevice.Handle);
+            if (commandBufferHandle == nint.Zero)
+            {
+                ReleaseGPUBuffer(_gpuDevice.Handle, newHandle);
+                return false;
+            }
+            var commandBuffer = new CommandBuffer(commandBufferHandle);
+            commandBuffer.WithCopyPass((cmd, pass) =>
+            {
+                var src = new GPUBufferLocation
+                {
+                    Buffer = Handle
+                };
+                var dest = new GPUBufferLocation
+                {
+                    Buffer = newHandle
+                };
+
+                CopyGPUBufferToBuffer(pass.Handle, src, dest, (uint)Size, true);
+            })
+            .Submit();
 
             ReleaseGPUBuffer(_gpuDevice.Handle, Handle);
 

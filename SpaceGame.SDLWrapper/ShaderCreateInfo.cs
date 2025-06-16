@@ -1,6 +1,6 @@
 ﻿using static SDL3.SDL;
 
-namespace SpaceGame.Infrastructure;
+namespace SpaceGame.SDLWrapper;
 
 public struct ShaderCreateInfo(byte[] code, string entryPoint, GPUShaderFormat shaderFormat, GPUShaderStage stage)
 {
