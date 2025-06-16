@@ -2,5 +2,6 @@
 {
     public class Player
     {
+        public float Speed { get; set; }
     }
 }

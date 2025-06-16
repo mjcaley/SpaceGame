@@ -4,7 +4,6 @@ using Flecs.NET;
 using Flecs.NET.Bindings;
 using Flecs.NET.Core;
 using System.Numerics;
-using SDL3;
 using static SDL3.SDL;
 
 namespace SpaceGame.Core;
@@ -13,19 +12,22 @@ public class Game(IRenderer renderer)
 {
     public World World { get; private set; } = World.Create();
     private RenderSystem renderSystem = new(renderer);
+    private InputState _inputState = new InputState();
 
     private void AddMockEntities()
     {
         World.Entity("Player")
             .Add<Transform>()
             .Add<Components.Rectangle>()
-            .Set(new Transform { Position = new Vector2(0.2f, 0.5f) })
-            .Set(new Components.Rectangle { Layer = Layer.Foreground, Colour = new Vector4(1.0f, 0f, 0f, 1.0f), Size = new Vector2(0.1f, 0.1f) });
+            .Set(new Transform { Position = new Vector2(100f, 100f) })
+            .Set(new Components.Rectangle { Layer = Layer.Foreground, Colour = new Vector4(0f, 0f, 1.0f, 1.0f), Size = new Vector2(16, 16) })
+            .Set(new Player { Speed = 100f });
+        
         World.Entity("Enemy")
             .Add<Transform>()
             .Add<Components.Rectangle>()
             .Set(new Transform { Position = new Vector2(0.6f, 0.5f) })
-            .Set(new Components.Rectangle { Layer = Layer.Foreground, Colour = new Vector4(1.0f, 0f, 0f, 1.0f), Size = new Vector2(0.1f, 0.1f) });
+            .Set(new Components.Rectangle { Layer = Layer.Foreground, Colour = new Vector4(1.0f, 0f, 0f, 1.0f), Size = new Vector2(16f, 16f) });
     }
 
     private void Setup()
@@ -40,8 +42,32 @@ public class Game(IRenderer renderer)
                     switch (@event.Type)
                     {
                         case (uint)EventType.KeyDown:
-                            if (@event.Key.Scancode == Scancode.Escape)
-                                World.Quit();
+                            switch (@event.Key.Scancode)
+                            {
+                                case Scancode.Escape:
+                                    World.Quit(); break;
+                                case Scancode.W:
+                                    _inputState.UpPressed = true; break;
+                                case Scancode.A:
+                                    _inputState.LeftPressed = true; break;
+                                case Scancode.S:
+                                    _inputState.DownPressed = true; break;
+                                case Scancode.D:
+                                    _inputState.RightPressed = true; break;
+                            }
+                            break;
+                        case (uint)EventType.KeyUp:
+                            switch (@event.Key.Scancode)
+                            {
+                                case Scancode.W:
+                                    _inputState.UpPressed = false; break;
+                                case Scancode.A:
+                                    _inputState.LeftPressed = false; break;
+                                case Scancode.S:
+                                    _inputState.DownPressed = false; break;
+                                case Scancode.D:
+                                    _inputState.RightPressed = false; break;
+                            }
                             break;
                     }
                 }
@@ -50,6 +76,35 @@ public class Game(IRenderer renderer)
         World.System("Clear sprite batch")
             .Kind(Ecs.PreUpdate)
             .Iter((Iter it) => renderSystem.Clear());
+
+        World.System<Transform, Player>("Player movement")
+            .Each((Iter it, int i, ref Transform t, ref Player p) =>
+            {
+                Vector2 direction = Vector2.Zero;
+
+                if (_inputState.UpPressed)
+                {
+                    direction.Y += 1f;
+                }
+                if (_inputState.DownPressed)
+                {
+                    direction.Y -= 1f;
+                }
+                if (_inputState.LeftPressed)
+                {
+                    direction.X -= 1f;
+                }
+                if (_inputState.RightPressed)
+                {
+                    direction.X += 1f;
+                }
+                if (direction != Vector2.Zero)
+                {
+                    direction = Vector2.Normalize(direction);
+                }
+
+                t.Position += direction * p.Speed * it.DeltaTime();
+            });
 
         World.System<Transform, Components.Rectangle>("Batch sprites")
             .Each((Iter it, int i, ref Transform t, ref Components.Rectangle s) =>

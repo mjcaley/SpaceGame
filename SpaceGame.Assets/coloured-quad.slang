@@ -10,10 +10,13 @@ struct VertexOutput
     float4 color : COLOR;
 };
 
+[[vk::binding(0, 1)]]
+ConstantBuffer<float4x4> Translate;
+
 [shader("vertex")]
 func vertexMain(vertex: AssembledVertex) -> VertexOutput {
     VertexOutput output;
-    output.position = float4(vertex.position, 0.0f, 1.0f);
+    output.position = mul(Translate, float4(vertex.position, 0.0f, 1.0f));
     output.color = vertex.color;
     
     return output;

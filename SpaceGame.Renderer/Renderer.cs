@@ -31,7 +31,7 @@ public class Renderer : IRenderer
             cmd.ColorTargetInfo = [
                 new()
                 {
-                    Texture = cmd.SwapchainTexture,
+                    Texture = cmd.SwapchainTexture.Handle,
                     ClearColor = new FColor { R = 0.5f, G = 0, B = 0.5f, A = 1.0f },
                     LoadOp = GPULoadOp.Clear,
                     StoreOp = GPUStoreOp.Store
@@ -45,12 +45,14 @@ public class Renderer : IRenderer
     {
         using var rectVertexShader = new VertexShader(
             GpuDevice.Handle,
-            CreateGPUShader(GpuDevice.Handle, new ShaderCreateInfo(
-                Assets.Shaders.QuadVertex.Spirv,
-                "main",
-                GPUShaderFormat.SPIRV,
-                GPUShaderStage.Vertex
-            ).ToSDL()
+            CreateGPUShader(GpuDevice.Handle, new ShaderCreateInfo()
+            {
+                Code = Assets.Shaders.QuadVertex.Spirv,
+                Entrypoint = "main",
+                Format = GPUShaderFormat.SPIRV,
+                Stage = GPUShaderStage.Vertex,
+                NumUniformBuffers = 1
+            }.ToSDL()
         ));
         using var rectFragmentShader = new FragmentShader(
             GpuDevice.Handle,

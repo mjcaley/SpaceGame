@@ -8,11 +8,11 @@ using static SDL3.SDL;
 
 namespace SpaceGame.SDLWrapper;
 
-public class CommandBufferWithSwapchain(nint commandBufferHandle, nint swapchainTexture)
+public class CommandBufferWithSwapchain(nint commandBufferHandle, SwapchainTexture swapchainTexture)
 {
     public nint CommandBufferHandle { get; private set; } = commandBufferHandle;
 
-    public nint SwapchainTexture { get; private set; } = swapchainTexture;
+    public SwapchainTexture SwapchainTexture => swapchainTexture;
 
     public GPUColorTargetInfo[] ColorTargetInfo { get; set; } = [];
 

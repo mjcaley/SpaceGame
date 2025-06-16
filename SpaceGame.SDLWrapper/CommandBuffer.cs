@@ -6,8 +6,6 @@ namespace SpaceGame.SDLWrapper;
 public class CommandBuffer(nint commandBufferHandle)
 {
     public nint CommandBufferHandle { get; private set; } = commandBufferHandle;
-
-    public nint? SwapchainTexture { get; private set; }
     
     public void Cancel()
     {
@@ -37,7 +35,7 @@ public class CommandBuffer(nint commandBufferHandle)
         
         // TODO: Save width and height
 
-        return new CommandBufferWithSwapchain(CommandBufferHandle, swapchainTexture);
+        return new CommandBufferWithSwapchain(CommandBufferHandle, new SwapchainTexture(swapchainTexture, swapchainWidth, swapchainHeight));
     }
 
     public CommandBuffer WithCopyPass(Action<CommandBuffer, CopyPass> func)

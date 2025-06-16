@@ -1,5 +1,6 @@
 using SpaceGame.Infrastructure;
 using SpaceGame.SDLWrapper;
+using System.Numerics;
 using static SDL3.SDL;
 
 namespace SpaceGame.Renderer;
@@ -62,6 +63,13 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
 
             BindGPUGraphicsPipeline(pass.Handle, renderer.RectanglePipeline.Pipeline.Handle);
             BindGPUVertexBuffers(pass.Handle, 0, bufferBinding, (uint)bufferBinding.Length);
+            var translate = Matrix4x4.CreateOrthographic(
+                cmd.SwapchainTexture.Width,
+                cmd.SwapchainTexture.Height,
+                -1,
+                1);
+            var translatePtr = (nint)(&translate);
+            PushGPUVertexUniformData(cmd.CommandBufferHandle, 0, translatePtr, (uint)sizeof(Matrix4x4));
             DrawGPUPrimitives(pass.Handle, (uint)_vertices.Count, (uint)_vertices.Count / 6, 0, 0);
         });
 
