@@ -11,8 +11,8 @@ namespace SpaceGame.Core;
 public class Game(IRenderer renderer)
 {
     public World World { get; private set; } = World.Create();
-    private RenderSystem renderSystem = new(renderer);
-    private InputState _inputState = new InputState();
+    private readonly RenderSystem _renderSystem = new(renderer);
+    private readonly InputState _inputState = new();
 
     private void AddMockEntities()
     {
@@ -26,7 +26,7 @@ public class Game(IRenderer renderer)
         World.Entity("Enemy")
             .Add<Transform>()
             .Add<Components.Rectangle>()
-            .Set(new Transform { Position = new Vector2(0.6f, 0.5f) })
+            .Set(new Transform { Position = Vector2.Zero })
             .Set(new Components.Rectangle { Layer = Layer.Foreground, Colour = new Vector4(1.0f, 0f, 0f, 1.0f), Size = new Vector2(16f, 16f) });
     }
 
@@ -35,6 +35,7 @@ public class Game(IRenderer renderer)
         AddMockEntities();
 
         World.System("Input")
+            .Kind(Ecs.PreUpdate)
             .Iter((Iter it) =>
             {
                 while (PollEvent(out var @event))
@@ -75,7 +76,7 @@ public class Game(IRenderer renderer)
         
         World.System("Clear sprite batch")
             .Kind(Ecs.PreUpdate)
-            .Iter((Iter it) => renderSystem.Clear());
+            .Iter((Iter it) => _renderSystem.Clear());
 
         World.System<Transform, Player>("Player movement")
             .Each((Iter it, int i, ref Transform t, ref Player p) =>
@@ -107,9 +108,10 @@ public class Game(IRenderer renderer)
             });
 
         World.System<Transform, Components.Rectangle>("Batch sprites")
+            .Kind(Ecs.PostUpdate)
             .Each((Iter it, int i, ref Transform t, ref Components.Rectangle s) =>
             {
-                renderSystem.Add(t, s);
+                _renderSystem.Add(t, s);
             });
 
         World.System("Frame timer")
@@ -122,10 +124,7 @@ public class Game(IRenderer renderer)
 
         World.System("Draw")
             .Kind(Ecs.PostFrame)
-            .Iter(() =>
-            {
-                renderSystem.Draw();
-            });
+            .Iter(() => _renderSystem.Draw());
 
         World.SetTargetFps(60);
     }
