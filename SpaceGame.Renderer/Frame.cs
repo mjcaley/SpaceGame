@@ -6,40 +6,45 @@ namespace SpaceGame.Renderer;
 
 public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) : IFrame
 {
+    private readonly List<ColouredVertex> _vertices = [];
+    
     public unsafe void Draw(Rectangle rectangle)
     {
-        var vertices = rectangle.ToVertices();
-        var size = vertices.Capacity * sizeof(float) * 2 * sizeof(float) * 4;
-        var uploadBuffer = renderer.RectanglePipeline.UploadBuffer;
-        uploadBuffer.TryResize(size);
-        var vertexBuffer = renderer.RectanglePipeline.VertexBuffer;
-        vertexBuffer.TryResize(size);
+        _vertices.AddRange(rectangle.ToVertices());
+    }
+
+    private unsafe void Draw()
+    {
+        var size = (_vertices.Capacity * sizeof(ColouredVertex));
+
+        var uploadBuffer = renderer.BorrowUploadBuffer(size);
+        var vertexBuffer = renderer.BorrowVertexBuffer(size);
 
         commandBuffer.WithCopyPass((cmd, pass) =>
         {
-            var mappedBufferPtr = MapGPUTransferBuffer(renderer.GpuDevice.Handle, uploadBuffer.Handle, true);
+            var mappedBufferPtr = MapGPUTransferBuffer(renderer.GpuDevice.Handle, uploadBuffer.Buffer.Handle, true);
             if (mappedBufferPtr == nint.Zero)
             {
                 return;
             }
             var mappedBuffer = (ColouredVertex*)mappedBufferPtr;
 
-            for (var i = 0; i < vertices.Count; i++)
+            for (var i = 0; i < _vertices.Count; i++)
             {
-                mappedBuffer[i].Position = vertices[i].Position;
-                mappedBuffer[i].Colour = vertices[i].Colour;
+                mappedBuffer[i].Position = _vertices[i].Position;
+                mappedBuffer[i].Colour = _vertices[i].Colour;
             }
 
-            UnmapGPUTransferBuffer(renderer.GpuDevice.Handle, uploadBuffer.Handle);
+            UnmapGPUTransferBuffer(renderer.GpuDevice.Handle, uploadBuffer.Buffer.Handle);
 
             GPUTransferBufferLocation source = new()
             {
-                TransferBuffer = uploadBuffer.Handle,
+                TransferBuffer = uploadBuffer.Buffer.Handle,
                 Offset = 0,
             };
             GPUBufferRegion destination = new()
             {
-                Buffer = vertexBuffer.Handle,
+                Buffer = vertexBuffer.Buffer.Handle,
                 Offset = 0,
                 Size = (uint)size
             };
@@ -50,19 +55,23 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
             var bufferBinding = new[] {
                 new GPUBufferBinding
                 {
-                    Buffer = vertexBuffer.Handle,
+                    Buffer = vertexBuffer.Buffer.Handle,
                     Offset = 0
                 }
             };
 
             BindGPUGraphicsPipeline(pass.Handle, renderer.RectanglePipeline.Pipeline.Handle);
             BindGPUVertexBuffers(pass.Handle, 0, bufferBinding, (uint)bufferBinding.Length);
-            DrawGPUPrimitives(pass.Handle, (uint)size, 1, 0, 0);
+            DrawGPUPrimitives(pass.Handle, (uint)_vertices.Count, (uint)_vertices.Count / 6, 0, 0);
         });
+
+        uploadBuffer.Return();
+        vertexBuffer.Return();
     }
 
     public void End()
     {
+        Draw();
         commandBuffer.Submit();
     }
 }

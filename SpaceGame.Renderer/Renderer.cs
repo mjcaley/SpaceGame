@@ -4,7 +4,7 @@ using static SDL3.SDL;
 
 namespace SpaceGame.Renderer;
 
-public class Renderer : IRenderer, IDisposable
+public class Renderer : IRenderer
 {
     public Renderer(IWindow window, IGpuDevice gpuDevice)
     {
@@ -15,6 +15,8 @@ public class Renderer : IRenderer, IDisposable
 
     private IWindow _window;
     private IGpuDevice _gpuDevice;
+    private List<TransferBuffer> _uploadBuffers = [];
+    private List<VertexBuffer> _vertexBuffers = [];
 
     public IWindow Window => _window;
     public IGpuDevice GpuDevice => _gpuDevice;
@@ -135,6 +137,24 @@ public class Renderer : IRenderer, IDisposable
         return new TransferBuffer(_gpuDevice, transferBuffer, size, usage);
     }
 
+    public BorrowedBuffer<TransferBuffer> BorrowUploadBuffer(int size)
+    {
+        TransferBuffer buffer;
+        
+        if (_uploadBuffers.Count == 0)
+        {
+            buffer = CreateTransferBuffer(size, GPUTransferBufferUsage.Upload);
+        }
+        else
+        {
+            buffer = _uploadBuffers[0];
+            buffer.TryResize(size);
+            _uploadBuffers.RemoveAt(0);
+        }
+
+        return new BorrowedBuffer<TransferBuffer>(buffer, _uploadBuffers);
+    }
+
     private VertexBuffer CreateVertexBuffer(int size)
     {
         var vertexBuffer = CreateGPUBuffer(_gpuDevice.Handle, new()
@@ -151,6 +171,24 @@ public class Renderer : IRenderer, IDisposable
         return new VertexBuffer(_gpuDevice, vertexBuffer, size);
     }
 
+    public BorrowedBuffer<VertexBuffer> BorrowVertexBuffer(int size)
+    {
+        VertexBuffer buffer;
+        
+        if (_uploadBuffers.Count == 0)
+        {
+            buffer = CreateVertexBuffer(size);
+        }
+        else
+        {
+            buffer = _vertexBuffers[0];
+            buffer.TryResize(size);
+            _uploadBuffers.RemoveAt(0);
+        }
+
+        return new BorrowedBuffer<VertexBuffer>(buffer, _vertexBuffers);
+    }
+
     protected virtual void Dispose(bool disposing)
     {
         if (!disposedValue)
@@ -161,6 +199,10 @@ public class Renderer : IRenderer, IDisposable
             }
 
             RectanglePipeline?.Dispose();
+            _uploadBuffers.ForEach(b => b.Dispose());
+            _uploadBuffers.Clear();
+            _vertexBuffers.ForEach(b => b.Dispose());
+            _vertexBuffers.Clear();
             disposedValue = true;
         }
     }
