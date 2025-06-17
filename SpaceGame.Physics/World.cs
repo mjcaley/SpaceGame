@@ -28,4 +28,24 @@ public class World
         _bodies[handle.Handle] = null;
         _freeList.Enqueue(handle);
     }
+
+    public void Clear()
+    {
+        _bodies.Clear();
+        _freeList.Clear();
+    }
+
+    public Body? Get(BodyHandle handle)
+    {
+        return _bodies.ElementAtOrDefault(handle.Handle);
+    }
+
+    public HashSet<Body> Query(BoundingBox boundingBox)
+    {
+        return _bodies
+            .Where(b => b is not null)
+            .Select(b => b!)
+            .Where(b => boundingBox.Contains(b.Shape.GetBoundingBox()))
+            .ToHashSet();
+    }
 }
