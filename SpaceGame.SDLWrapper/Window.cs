@@ -4,7 +4,7 @@ using static SDL3.SDL;
 
 namespace SpaceGame.SDLWrapper;
 
-public class Window : IWindow, IDisposable
+public class Window : IWindow
 {
     public int Width { get; set; }
     public int Height { get; set; }

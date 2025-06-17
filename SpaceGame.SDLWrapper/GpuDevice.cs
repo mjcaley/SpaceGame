@@ -3,7 +3,7 @@ using SpaceGame.Infrastructure;
 
 namespace SpaceGame.SDLWrapper;
 
-public class GpuDevice : IGpuDevice, IDisposable
+public class GpuDevice : IGpuDevice
 {
     public GpuDevice(IWindow window)
     {
@@ -15,7 +15,12 @@ public class GpuDevice : IGpuDevice, IDisposable
         }
 
         var claimed = ClaimWindowForGPUDevice(Handle, _window.Handle);
-        if (claimed) return;
+        if (claimed)
+        {
+            SetGPUSwapchainParameters(Handle, _window.Handle, GPUSwapchainComposition.SDR, GPUPresentMode.Mailbox);
+            return;
+        }
+        
         DestroyGPUDevice(Handle);
         Handle = nint.Zero;
         throw new GpuDeviceException("Failed to claim window");

@@ -1,10 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using SDL3;
-using System.Numerics;
 using SpaceGame.Core;
-using SpaceGame.Core.Components;
 using SpaceGame.Infrastructure;
 using SpaceGame.Renderer;
 using SpaceGame.SDLWrapper;

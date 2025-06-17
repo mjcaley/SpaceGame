@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Hexa.NET.ImGui" Version="2.2.7" />
+    <PackageReference Include="Hexa.NET.ImGui.Backends.SDL3" Version="1.0.16" />
     <PackageReference Include="SDL3-CS" Version="3.2.14.2" />
   </ItemGroup>
 

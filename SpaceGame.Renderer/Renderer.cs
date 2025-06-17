@@ -11,6 +11,7 @@ public class Renderer : IRenderer
         _window = window;
         _gpuDevice = gpuDevice;
         InitPipelines();
+        ImGuiController = new ImGuiController(window, gpuDevice);
     }
 
     private IWindow _window;
@@ -23,6 +24,8 @@ public class Renderer : IRenderer
 
     private RectanglePipeline _rectanglePipeline;
     public RectanglePipeline RectanglePipeline => _rectanglePipeline;
+
+    public ImGuiController ImGuiController { get; init; }
 
     public IFrame BeginFrame() => new Frame(
         AcquireCommandBuffer()
@@ -111,7 +114,7 @@ public class Renderer : IRenderer
             CreateVertexBuffer(sizeof(float) * 6 * 4)
         );
     }
-
+    
     private CommandBuffer AcquireCommandBuffer()
     {
         var commandBuffer = AcquireGPUCommandBuffer(_gpuDevice.Handle);
@@ -198,6 +201,7 @@ public class Renderer : IRenderer
             if (disposing)
             {
                 // TODO: dispose managed state (managed objects)
+                ImGuiController.Dispose();
             }
 
             RectanglePipeline?.Dispose();
