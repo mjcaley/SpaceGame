@@ -22,6 +22,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{75E8FC9E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceGame.Physics", "SpaceGame.Physics\SpaceGame.Physics.csproj", "{1F8A48B3-48E4-48CF-B53D-98FCE8B99067}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceGame.Physics.Tests", "SpaceGame.Physics.Test\SpaceGame.Physics.Tests.csproj", "{1EA2CB0D-59DE-4216-910B-DA01D1D11E03}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +58,10 @@ Global
 		{1F8A48B3-48E4-48CF-B53D-98FCE8B99067}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F8A48B3-48E4-48CF-B53D-98FCE8B99067}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F8A48B3-48E4-48CF-B53D-98FCE8B99067}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1EA2CB0D-59DE-4216-910B-DA01D1D11E03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EA2CB0D-59DE-4216-910B-DA01D1D11E03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EA2CB0D-59DE-4216-910B-DA01D1D11E03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EA2CB0D-59DE-4216-910B-DA01D1D11E03}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,4 +1,6 @@
-﻿namespace SpaceGame.Physics;
+﻿using System.Linq;
+
+namespace SpaceGame.Physics;
 
 public class World
 {
@@ -42,10 +44,18 @@ public class World
 
     public HashSet<Body> Query(BoundingBox boundingBox)
     {
-        return _bodies
+        return [.. _bodies
             .Where(b => b is not null)
             .Select(b => b!)
-            .Where(b => boundingBox.Contains(b.Shape.GetBoundingBox()))
-            .ToHashSet();
+            .Where(b => b.Shape switch {
+                    Shape.Circle circle => boundingBox.Overlaps(circle.GetBoundingBox()),
+                    _ => throw new NotSupportedException($"Shape type {b.Shape.GetType()} is not supported for bounding box queries.")
+                }
+            )];
+    }
+
+    public bool Colliding(Body b1, Body b2)
+    {
+        return CollisionResolver.Colliding(b1.Shape, b2.Shape);
     }
 }
