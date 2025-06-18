@@ -4,7 +4,14 @@ namespace SpaceGame.Physics;
 
 public abstract record Shape
 {
-    public record Circle(Vector2 center, float radius) : Shape
+    public static BoundingBox GetBoundingBox(Shape shape) =>
+        shape switch
+        {
+            Circle circle => circle.GetBoundingBox(),
+            _ => throw new NotSupportedException("Shape not supported")
+        };
+    
+    public record Circle(Vector2 center, float radius) : Shape, IBoundary
     {
         public Vector2 Center => center;
         public float Radius => radius;

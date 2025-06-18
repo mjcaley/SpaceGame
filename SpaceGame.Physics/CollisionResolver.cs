@@ -12,7 +12,7 @@ public static class CollisionResolver
         };
 
     private static bool CircleColliding(Shape.Circle c1, Shape.Circle c2) =>
-        Vector2.Distance(c1.Center, c2.Center) > c1.Radius + c2.Radius;
+        Vector2.Distance(c1.Center, c2.Center) < c1.Radius + c2.Radius;
 
     public static CollisionResult? Resolve(Shape s1, Shape s2)
     {

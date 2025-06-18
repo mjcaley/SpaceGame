@@ -22,7 +22,7 @@ public class World
 
     public void Remove(BodyHandle handle)
     {
-        if (_bodies.Count > handle.Handle)
+        if (_bodies.Count <= handle.Handle)
         {
             return;
         }
@@ -37,23 +37,46 @@ public class World
         _freeList.Clear();
     }
 
-    public Body? Get(BodyHandle handle)
-    {
-        return _bodies.ElementAtOrDefault(handle.Handle);
-    }
+    public Body? Get(BodyHandle handle) =>
+        _bodies.Count <= handle.Handle ? null : _bodies[handle.Handle];
 
-    public HashSet<Body> Query(BoundingBox boundingBox)
+    public HashSet<Body> Query(BoundingBox boundingBox) =>
+    [.. _bodies
+        .Where(b => b is not null)
+        .Select(b => b!)
+        .Where(b => b.Shape switch {
+                Shape.Circle circle => boundingBox.Overlaps(circle.GetBoundingBox()),
+                _ => throw new NotSupportedException($"Shape type {b.Shape.GetType()} is not supported for bounding box queries.")
+            }
+        )];
+
+    public HashSet<CollisionPair> Broadphase()
     {
-        return [.. _bodies
-            .Where(b => b is not null)
-            .Select(b => b!)
-            .Where(b => b.Shape switch {
-                    Shape.Circle circle => boundingBox.Overlaps(circle.GetBoundingBox()),
-                    _ => throw new NotSupportedException($"Shape type {b.Shape.GetType()} is not supported for bounding box queries.")
+        var pairs = new HashSet<CollisionPair>();
+        
+        foreach (var b1 in _bodies.Where(b => b is not null))
+        {
+            foreach (var b2 in _bodies.Skip(1).Union(_bodies.Take(1)).Where(b => b is not null))
+            {
+                var b1Box = Shape.GetBoundingBox(b1!.Shape);
+                var b2Box = Shape.GetBoundingBox(b2!.Shape);
+                if (b1Box.Overlaps(b2Box))
+                {
+                    pairs.Add(new CollisionPair(b1, b2));
                 }
-            )];
+            }
+        }
+
+        return pairs;
     }
 
+    public HashSet<CollisionPair> Narrowphase(HashSet<CollisionPair> broadPairs) =>
+    [
+        .. broadPairs
+            .Where(p => CollisionResolver.Colliding(p.A.Shape, p.B.Shape))
+            .Select(p => )
+    ];
+    
     public bool Colliding(Body b1, Body b2)
     {
         return CollisionResolver.Colliding(b1.Shape, b2.Shape);
