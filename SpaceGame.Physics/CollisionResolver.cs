@@ -27,6 +27,12 @@ public static class CollisionResolver
         };
     }
 
+    public static bool TryResolve(Shape s1, Shape s2, out CollisionResult? result)
+    {
+        result = Resolve(s1, s2);
+        return result is not null;
+    }
+
     private static CollisionResult ResolveCircleCollision(Shape.Circle c1, Shape.Circle c2)
     {
         var depth = c1.Radius + c1.radius - Vector2.Distance(c1.Center, c2.Center);

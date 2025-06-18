@@ -50,6 +50,13 @@ public class World
             }
         )];
 
+    public void Step(float deltaTime)
+    {
+        var broadCollisions = Broadphase();
+        var narrowCollisions = Narrowphase(broadCollisions);
+
+    }
+
     public HashSet<CollisionPair> Broadphase()
     {
         var pairs = new HashSet<CollisionPair>();
@@ -70,12 +77,23 @@ public class World
         return pairs;
     }
 
-    public HashSet<CollisionPair> Narrowphase(HashSet<CollisionPair> broadPairs) =>
-    [
-        .. broadPairs
-            .Where(p => CollisionResolver.Colliding(p.A.Shape, p.B.Shape))
-            .Select(p => )
-    ];
+    public Dictionary<CollisionPair, CollisionResult> Narrowphase(HashSet<CollisionPair> broadPairs) => new([
+        ..broadPairs
+            .Select(p => new Tuple<CollisionPair, CollisionResult?>(p, CollisionResolver.Resolve(p.A.Shape, p.B.Shape)))
+            .Where(t => t.Item2 is not null)
+            .Select(t => new KeyValuePair<CollisionPair, CollisionResult>(t.Item1, t.Item2!))
+    ]);
+
+    public HashSet<CollisionPair> Resolve(Dictionary<CollisionPair, CollisionResult> collisions)
+    {
+        foreach (var collision in collisions)
+        {
+            if (CollisionResolver.TryResolve(collision.Key.A.Shape, collision.Key.B.Shape, out var stillColliding))
+            {
+
+            }
+        }
+    }
     
     public bool Colliding(Body b1, Body b2)
     {
