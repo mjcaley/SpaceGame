@@ -94,15 +94,17 @@ public class World
 
     public HashSet<CollisionPair> Resolve(Dictionary<CollisionPair, CollisionResult> collisions)
     {
+        var collisions = new HashSet<CollisionPair>();
+
         foreach (var collision in collisions)
         {
             if (CollisionResolver.TryResolve(collision.Key.A.Shape, collision.Key.B.Shape, out var stillColliding))
             {
-
+                
             }
         }
 
-        return new();
+        return collisions;
     }
     
     public bool Colliding(Body b1, Body b2)
