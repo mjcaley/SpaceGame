@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Numerics;
+using System.Linq;
 
 namespace SpaceGame.Physics;
 
@@ -6,6 +7,13 @@ public class World
 {
     private readonly List<Body?> _bodies = [];
     private readonly Queue<BodyHandle> _freeList = [];
+
+    public event EventHandler<PositionChangedEvent>? PositionChanged;
+
+    protected virtual void OnPositionChanged(BodyHandle handle, Vector2 position)
+    {
+        PositionChanged?.Invoke(this, new(handle, position));
+    }
 
     public BodyHandle Add(Body body)
     {
@@ -93,6 +101,8 @@ public class World
 
             }
         }
+
+        return new();
     }
     
     public bool Colliding(Body b1, Body b2)
