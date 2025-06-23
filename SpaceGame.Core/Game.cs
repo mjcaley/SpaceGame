@@ -13,26 +13,38 @@ public class Game(IRenderer renderer)
     public World World { get; private set; } = World.Create();
     private readonly RenderSystem _renderSystem = new(renderer);
     private readonly InputState _inputState = new();
+    private readonly PhysicsSystem _physicsSystem = new();
 
     private void AddMockEntities()
     {
         World.Entity("Player")
-            .Add<Transform>()
-            .Add<Components.Rectangle>()
             .Set(new Transform { Position = new Vector2(100f, 100f) })
             .Set(new Components.Rectangle { Layer = Layer.Foreground, Colour = new Vector4(0f, 0f, 1.0f, 1.0f), Size = new Vector2(16, 16) })
+            .Set(new PhysicsBody { Shape = new Circle { Radius = 1f } })
             .Set(new Player { Speed = 100f });
         
         World.Entity("Enemy")
-            .Add<Transform>()
-            .Add<Components.Rectangle>()
             .Set(new Transform { Position = Vector2.Zero })
             .Set(new Components.Rectangle { Layer = Layer.Foreground, Colour = new Vector4(1.0f, 0f, 0f, 1.0f), Size = new Vector2(16f, 16f) });
     }
 
     private void Setup()
     {
-        AddMockEntities();
+        World.Observer<Transform, PhysicsBody>()
+            .Event(Ecs.Monitor)
+            .Each((Iter it, int i, ref Transform transform, ref PhysicsBody body) =>
+            {
+                if (it.Event() == Ecs.OnAdd)
+                {
+                    //if (transform is null || body is null) return;  // TODO: This never triggers because body is null
+                    _physicsSystem.OnAdd(i, transform.Position, body);
+                }
+                else if (it.Event() == Ecs.OnRemove)
+                {
+                    _physicsSystem.OnRemove(i);
+                }
+            }
+            );
 
         World.System("Input")
             .Kind(Ecs.PreUpdate)
@@ -127,6 +139,8 @@ public class Game(IRenderer renderer)
             .Iter(() => _renderSystem.Draw());
 
         World.SetTargetFps(60);
+
+        AddMockEntities();
     }
 
     public void Run()
