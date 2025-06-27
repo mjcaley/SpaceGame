@@ -1,13 +1,13 @@
 using System.Numerics;
 using nkast.Aether.Physics2D.Dynamics;
-using PhysicsVector2D = nkast.Aether.Physics2D.Common.Vector2;
+using PhysicsVector2 = nkast.Aether.Physics2D.Common.Vector2;
 using SpaceGame.Infrastructure;
 
 namespace SpaceGame.Core;
 
 public class PhysicsSystem
 {
-    public World World { get; } = new();
+    public World World { get; } = new(PhysicsVector2.Zero);
 
     public void OnAdd(int id, Body body)
     {

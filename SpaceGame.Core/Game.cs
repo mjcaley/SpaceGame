@@ -33,7 +33,10 @@ public class Game
 
     private void AddMockEntities()
     {
-        var playerBody = new Body();
+        var playerBody = new Body()
+        {
+            BodyType = nkast.Aether.Physics2D.Dynamics.BodyType.Dynamic
+        };
         playerBody.CreateCircle(.5f, 1f);
         playerBody.Position = new nkast.Aether.Physics2D.Common.Vector2(100f, 100f);
 
@@ -43,7 +46,10 @@ public class Game
             .Set(new Components.Rectangle { Layer = Layer.Foreground, Colour = new Vector4(0f, 0f, 1.0f, 1.0f), Size = new Vector2(16, 16) })
             .Set(new Player { Speed = 100f });
 
-        var enemyBody = new Body();
+        var enemyBody = new Body()
+        {
+            BodyType = nkast.Aether.Physics2D.Dynamics.BodyType.Dynamic
+        };
         playerBody.CreateCircle(.5f, 1f);
         World.Entity("Enemy")
             .Set(new Transform { Position = Vector2.Zero })
@@ -122,6 +128,7 @@ public class Game
             .Each((Iter it, int i, ref Transform t, ref Body b) =>
             {
                 b.ApplyForce(new nkast.Aether.Physics2D.Common.Vector2(t.Velocity.X, t.Velocity.Y));
+                Console.WriteLine($"Physics force: {b.AngularVelocity} {b.LinearVelocity}");
             });
 
         World.System()
