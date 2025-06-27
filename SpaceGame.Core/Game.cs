@@ -16,6 +16,8 @@ public class Game
     public Entity OnPhysics { get; }
     public Entity PostPhysics { get; }
 
+    private TimerEntity _fixedTickSource;
+
     private readonly RenderSystem _renderSystem;
     private readonly PhysicsSystem _physicsSystem = new();
     private readonly InputState _inputState = new();
@@ -26,6 +28,8 @@ public class Game
         PrePhysics = World.Entity().Add(Ecs.Phase).Add(Ecs.DependsOn, Ecs.PostUpdate);
         OnPhysics = World.Entity().Add(Ecs.Phase).Add(Ecs.DependsOn, PrePhysics);
         PostPhysics = World.Entity().Add(Ecs.Phase).Add(Ecs.DependsOn, OnPhysics);
+
+        _fixedTickSource = World.Timer().Interval(.2f);
 
         _renderSystem = new(renderer);
         _movementSystem = new(_inputState);
@@ -125,6 +129,7 @@ public class Game
 
         World.System<Transform, Body>("Physics update")
             .Kind(PrePhysics)
+            .TickSource(_fixedTickSource)
             .Each((Iter it, int i, ref Transform t, ref Body b) =>
             {
                 b.ApplyForce(new nkast.Aether.Physics2D.Common.Vector2(t.Velocity.X, t.Velocity.Y));
@@ -133,6 +138,7 @@ public class Game
 
         World.System()
             .Kind(OnPhysics)
+            .TickSource(_fixedTickSource)
             .Iter((Iter it) => {
                 _physicsSystem.Update(it.DeltaTime());
             });
@@ -158,14 +164,12 @@ public class Game
             .Iter(() => _renderSystem.Draw());
 
         World.SetTargetFps(60);
-
-        AddMockEntities();
     }
 
     public void Run()
     {
-        Console.WriteLine("Hello, Space Game!");
         Setup();
+        AddMockEntities();
 
         while (World.Progress()) {
             if (World.ShouldQuit())
