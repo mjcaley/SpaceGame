@@ -5,34 +5,67 @@ using Flecs.NET.Bindings;
 using Flecs.NET.Core;
 using System.Numerics;
 using static SDL3.SDL;
+using Body = nkast.Aether.Physics2D.Dynamics.Body;
 
 namespace SpaceGame.Core;
 
-public class Game(IRenderer renderer)
+public class Game
 {
     public World World { get; private set; } = World.Create();
-    private readonly RenderSystem _renderSystem = new(renderer);
+    public Entity PrePhysics { get; }
+    public Entity OnPhysics { get; }
+    public Entity PostPhysics { get; }
+
+    private readonly RenderSystem _renderSystem;
+    private readonly PhysicsSystem _physicsSystem = new();
     private readonly InputState _inputState = new();
+    private readonly MovementSystem _movementSystem;
+
+    public Game(IRenderer renderer)
+    {
+        PrePhysics = World.Entity().Add(Ecs.Phase).Add(Ecs.DependsOn, Ecs.PostUpdate);
+        OnPhysics = World.Entity().Add(Ecs.Phase).Add(Ecs.DependsOn, PrePhysics);
+        PostPhysics = World.Entity().Add(Ecs.Phase).Add(Ecs.DependsOn, OnPhysics);
+
+        _renderSystem = new(renderer);
+        _movementSystem = new(_inputState);
+    }
 
     private void AddMockEntities()
     {
+        var playerBody = new Body();
+        playerBody.CreateCircle(.5f, 1f);
+        playerBody.Position = new nkast.Aether.Physics2D.Common.Vector2(100f, 100f);
+
         World.Entity("Player")
-            .Add<Transform>()
-            .Add<Components.Rectangle>()
             .Set(new Transform { Position = new Vector2(100f, 100f) })
+            .Set(playerBody)
             .Set(new Components.Rectangle { Layer = Layer.Foreground, Colour = new Vector4(0f, 0f, 1.0f, 1.0f), Size = new Vector2(16, 16) })
             .Set(new Player { Speed = 100f });
-        
+
+        var enemyBody = new Body();
+        playerBody.CreateCircle(.5f, 1f);
         World.Entity("Enemy")
-            .Add<Transform>()
-            .Add<Components.Rectangle>()
             .Set(new Transform { Position = Vector2.Zero })
+            .Set(enemyBody)
             .Set(new Components.Rectangle { Layer = Layer.Foreground, Colour = new Vector4(1.0f, 0f, 0f, 1.0f), Size = new Vector2(16f, 16f) });
     }
 
     private void Setup()
     {
-        AddMockEntities();
+        World.Observer<Body>()
+            .Event(Ecs.OnSet)
+            .Each((Iter it, int i, ref Body b) =>
+            {
+                _physicsSystem.OnAdd(i, b);
+            });
+
+        World.Observer<Body>()
+            .Event(Ecs.OnRemove)
+            .Each((Iter it, int i, ref Body b) =>
+            {
+                _physicsSystem.OnRemove(b);
+            });
 
         World.System("Input")
             .Kind(Ecs.PreUpdate)
@@ -81,36 +114,28 @@ public class Game(IRenderer renderer)
         World.System<Transform, Player>("Player movement")
             .Each((Iter it, int i, ref Transform t, ref Player p) =>
             {
-                Vector2 direction = Vector2.Zero;
-
-                if (_inputState.UpPressed)
-                {
-                    direction.Y += 1f;
-                }
-                if (_inputState.DownPressed)
-                {
-                    direction.Y -= 1f;
-                }
-                if (_inputState.LeftPressed)
-                {
-                    direction.X -= 1f;
-                }
-                if (_inputState.RightPressed)
-                {
-                    direction.X += 1f;
-                }
-                if (direction != Vector2.Zero)
-                {
-                    direction = Vector2.Normalize(direction);
-                }
-
-                t.Position += direction * p.Speed * it.DeltaTime();
+                _movementSystem.Update(p, t, it.DeltaTime());
             });
 
-        World.System<Transform, Components.Rectangle>("Batch sprites")
-            .Kind(Ecs.PostUpdate)
-            .Each((Iter it, int i, ref Transform t, ref Components.Rectangle s) =>
+        World.System<Transform, Body>("Physics update")
+            .Kind(PrePhysics)
+            .Each((Iter it, int i, ref Transform t, ref Body b) =>
             {
+                b.ApplyForce(new nkast.Aether.Physics2D.Common.Vector2(t.Velocity.X, t.Velocity.Y));
+            });
+
+        World.System()
+            .Kind(OnPhysics)
+            .Iter((Iter it) => {
+                _physicsSystem.Update(it.DeltaTime());
+            });
+
+        World.System<Transform, Components.Rectangle, Body>("Batch sprites")
+            .Kind(PostPhysics)
+            .Each((Iter it, int i, ref Transform t, ref Components.Rectangle s, ref Body b) =>
+            {
+                Console.WriteLine($"{i} {t.Position} to {b.Position}");
+                t.Position = new Vector2(b.Position.X, b.Position.Y);
                 _renderSystem.Add(t, s);
             });
 
@@ -118,8 +143,7 @@ public class Game(IRenderer renderer)
             .Kind(Ecs.OnUpdate)
             .Iter((Iter it) =>
             {
-                Console.WriteLine("timer");
-                Console.WriteLine($"Delta time is {it.DeltaTime()}");
+                // Console.WriteLine($"Delta time is {it.DeltaTime()}");
             });
 
         World.System("Draw")
@@ -127,6 +151,8 @@ public class Game(IRenderer renderer)
             .Iter(() => _renderSystem.Draw());
 
         World.SetTargetFps(60);
+
+        AddMockEntities();
     }
 
     public void Run()

@@ -8,6 +8,7 @@ using SpaceGame.Core.Components;
 using SpaceGame.Infrastructure;
 using SpaceGame.Renderer;
 using SpaceGame.SDLWrapper;
+using nkast.Aether.Physics2D.Dynamics;
 
 
 var builder = Host.CreateApplicationBuilder(args);
