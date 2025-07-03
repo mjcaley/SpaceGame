@@ -73,11 +73,19 @@ public class PhysicsSystem
     public void Update(float deltaTime)
     {
         b2World_Step(WorldId, deltaTime, 4);
-        var moveEvents = b2World_GetBodyEvents(WorldId);
-        for (var i = 0; i < moveEvents.moveCount; i++)
+        _world.Defer(() =>
         {
-            
-        }
+            var moveEvents = b2World_GetBodyEvents(WorldId);
+            for (var i = 0; i < moveEvents.moveCount; i++)
+            {
+                var moveEvent = moveEvents.moveEvents[i];
+                var entity = (Entity)moveEvent.userData;
+                var position = new Vector2(moveEvent.transform.p.X, moveEvent.transform.p.Y);
+
+                _world.Set(new PhysicsPositionChanged { Position = position });
+                _world.Event<PhysicsPositionChanged>().Entity(entity).Id<Transform>().Enqueue();
+            }
+        });
     }
 
     public Vector2 GetPosition(B2BodyId id)
@@ -88,6 +96,6 @@ public class PhysicsSystem
 
     public void ApplyForce(B2BodyId id, Vector2 force)
     {
-        b2Body_ApplyForceToCenter(id, new B2Vec2(1, 0), true);
+        b2Body_ApplyForceToCenter(id, new B2Vec2(100, 0), true);
     }
 }

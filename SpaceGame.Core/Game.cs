@@ -76,6 +76,13 @@ public class Game
                 _physicsSystem.OnRemove(it.Entity(i));
             });
 
+        World.Observer<Transform>()
+            .Event<PhysicsPositionChanged>()
+            .Each((Iter it, int i, ref Transform t) =>
+            {
+                
+            });
+
         World.System("Input")
             .Kind(Ecs.PreUpdate)
             .Iter((Iter it) =>
@@ -131,7 +138,10 @@ public class Game
             .TickSource(_fixedTickSource)
             .Each((Iter it, int i, ref Transform t, ref Box2DBodyId b) =>
             {
-                _physicsSystem.ApplyForce(b.BodyId, t.Velocity);
+                if (t.Velocity != Vector2.Zero)
+                {
+                    _physicsSystem.ApplyForce(b.BodyId, t.Velocity);
+                }
             });
 
         World.System()

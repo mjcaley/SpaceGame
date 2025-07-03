@@ -30,6 +30,6 @@ public class MovementSystem(InputState inputState)
             direction = Vector2.Normalize(direction);
         }
 
-        transform.Velocity += direction * player.Speed;
+        transform.Velocity += direction * player.Speed * deltaTime;
     }
 }
