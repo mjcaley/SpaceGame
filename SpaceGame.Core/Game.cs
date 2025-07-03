@@ -19,7 +19,7 @@ public class Game
     private TimerEntity _fixedTickSource;
 
     private readonly RenderSystem _renderSystem;
-    private readonly PhysicsSystem _physicsSystem = new();
+    private readonly PhysicsSystem _physicsSystem;
     private readonly InputState _inputState = new();
     private readonly MovementSystem _movementSystem;
 
@@ -33,6 +33,7 @@ public class Game
 
         _renderSystem = new(renderer);
         _movementSystem = new(_inputState);
+        _physicsSystem = new(World);
     }
 
     private void AddMockEntities()

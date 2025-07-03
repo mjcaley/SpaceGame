@@ -3,15 +3,21 @@ using System.Numerics;
 //using PhysicsVector2 = nkast.Aether.Physics2D.Common.Vector2;
 using SpaceGame.Infrastructure;
 using Box2D.NET;
+using static Box2D.NET.B2Body;
 using static Box2D.NET.B2Bodies;
+using static Box2D.NET.B2Shapes;
 using static Box2D.NET.B2Worlds;
+using static Box2D.NET.B2Types;
+using Flecs.NET.Core;
+using SpaceGame.Core.Components;
 
 namespace SpaceGame.Core;
 
 public class PhysicsSystem
 {
-    public PhysicsSystem()
+    public PhysicsSystem(World world)
     {
+        _world = world;
         var worldDef = new B2WorldDef
         {
             gravity = new B2Vec2()
@@ -24,18 +30,40 @@ public class PhysicsSystem
         b2DestroyWorld(World);
     }
 
-    //public World World { get; } = new(PhysicsVector2.Zero);
+    private World _world;
     public B2WorldId World { get; }
 
-    public void OnAdd(int id, ref B2BodyDef bodyDefinition)
+    public void OnAdd(ulong id, Vector2 position, Circle circle)
     {
-        bodyDefinition.userData = id;
-        var bodyId = b2CreateBody(World, ref bodyDefinition);
+        var definition = b2DefaultBodyDef();
+        definition.userData = id;
+        definition.type = B2BodyType.b2_dynamicBody;
+        definition.position = new B2Vec2(position.X, position.Y);
+        var body = b2CreateBody(World, ref definition);
+                
+        var shapeDef = b2DefaultShapeDef();
+        shapeDef.density = 1f;
+        shapeDef.material.friction = .5f;
+
+        var shapeCircle = new B2Circle(new B2Vec2(circle.Center.X, circle.Center.Y), circle.Radius);
+
+        b2CreateCircleShape(body, ref shapeDef, ref shapeCircle);
+
+        _world.Entity(id).Set(new Box2DBodyId { BodyId = body });
     }
 
-    public void OnRemove(B2Body body)
+    public void OnRemove(ulong id)
     {
-        //World.Remove(body);
+        var bodyId = _world.Entity(id).Get<Box2DBodyId>();
+        if (bodyId == null)
+        {
+            return;
+        }
+        var world = b2GetWorldFromId(World);
+        var body = b2GetBodyFullId(world, bodyId.BodyId);
+        b2RemoveBodyFromIsland(world, body);
+
+        _world.Entity(id).Remove<Box2DBodyId>();
     }
 
     public void Update(float deltaTime)
