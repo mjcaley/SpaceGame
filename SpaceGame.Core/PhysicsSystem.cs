@@ -1,6 +1,4 @@
 using System.Numerics;
-//using nkast.Aether.Physics2D.Dynamics;
-//using PhysicsVector2 = nkast.Aether.Physics2D.Common.Vector2;
 using SpaceGame.Infrastructure;
 using Box2D.NET;
 using static Box2D.NET.B2Body;
@@ -22,24 +20,24 @@ public class PhysicsSystem
         {
             gravity = new B2Vec2()
         };
-        World = b2CreateWorld(ref worldDef);
+        WorldId = b2CreateWorld(ref worldDef);
     }
 
     ~PhysicsSystem()
     {
-        b2DestroyWorld(World);
+        b2DestroyWorld(WorldId);
     }
 
     private World _world;
-    public B2WorldId World { get; }
+    public B2WorldId WorldId { get; }
 
-    public void OnAdd(ulong id, Vector2 position, Circle circle)
+    public void OnAdd(Entity id, Vector2 position, Circle circle)
     {
         var definition = b2DefaultBodyDef();
         definition.userData = id;
         definition.type = B2BodyType.b2_dynamicBody;
         definition.position = new B2Vec2(position.X, position.Y);
-        var body = b2CreateBody(World, ref definition);
+        var body = b2CreateBody(WorldId, ref definition);
                 
         var shapeDef = b2DefaultShapeDef();
         shapeDef.density = 1f;
@@ -49,25 +47,47 @@ public class PhysicsSystem
 
         b2CreateCircleShape(body, ref shapeDef, ref shapeCircle);
 
-        _world.Entity(id).Set(new Box2DBodyId { BodyId = body });
+        var massData = new B2MassData
+        {
+            mass = 10f,
+            center = new B2Vec2(circle.Center.X, circle.Center.Y),
+            rotationalInertia = 100f
+        };
+        b2Body_SetMassData(body, massData);
+
+        id.Set(new Box2DBodyId { BodyId = body });
     }
 
-    public void OnRemove(ulong id)
+    public void OnRemove(Entity id)
     {
-        var bodyId = _world.Entity(id).Get<Box2DBodyId>();
+        var bodyId = id.Get<Box2DBodyId>();
         if (bodyId == null)
         {
             return;
         }
-        var world = b2GetWorldFromId(World);
-        var body = b2GetBodyFullId(world, bodyId.BodyId);
-        b2RemoveBodyFromIsland(world, body);
+        b2DestroyBody(bodyId.BodyId);
 
-        _world.Entity(id).Remove<Box2DBodyId>();
+        id.Remove<Box2DBodyId>();
     }
 
     public void Update(float deltaTime)
     {
-        //World.Step(deltaTime);
+        b2World_Step(WorldId, deltaTime, 4);
+        var moveEvents = b2World_GetBodyEvents(WorldId);
+        for (var i = 0; i < moveEvents.moveCount; i++)
+        {
+            
+        }
+    }
+
+    public Vector2 GetPosition(B2BodyId id)
+    {
+        var position = b2Body_GetPosition(id);
+        return new Vector2(position.X, position.Y);
+    }
+
+    public void ApplyForce(B2BodyId id, Vector2 force)
+    {
+        b2Body_ApplyForceToCenter(id, new B2Vec2(1, 0), true);
     }
 }

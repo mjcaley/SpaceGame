@@ -17,6 +17,7 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
     private unsafe void Draw()
     {
         var size = (_vertices.Capacity * sizeof(ColouredVertex));
+        if (size == 0) return;
 
         var uploadBuffer = renderer.BorrowUploadBuffer(size);
         var vertexBuffer = renderer.BorrowVertexBuffer(size);
