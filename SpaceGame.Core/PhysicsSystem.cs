@@ -79,8 +79,7 @@ public class PhysicsSystem
                 var entity = (Entity)moveEvent.userData;
                 var position = new Vector2(moveEvent.transform.p.X, moveEvent.transform.p.Y);
 
-                _world.Set(new PhysicsPositionChanged { Position = position });
-                _world.Event<PhysicsPositionChanged>().Entity(entity).Id<Transform>().Enqueue();
+                entity.Set(new PhysicsPositionChanged { Position = position });
             }
         });
     }

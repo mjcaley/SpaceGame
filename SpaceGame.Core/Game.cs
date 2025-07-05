@@ -69,13 +69,6 @@ public class Game
                 _physicsSystem.OnRemove(it.Entity(i));
             });
 
-        World.Observer<Transform>()
-            .Event<PhysicsPositionChanged>()
-            .Each((Iter it, int i, ref Transform t) =>
-            {
-                
-            });
-
         World.System("Input")
             .Kind(Ecs.PreUpdate)
             .Iter((Iter it) =>
@@ -144,16 +137,24 @@ public class Game
                 _physicsSystem.Update(it.DeltaTime());
             });
 
-        World.System<Transform, B2BodyId>("Update position from physics")
+        // World.System<Transform, B2BodyId>("Update position from physics")
+        //     .Kind(PostPhysics)
+        //     .TickSource(_fixedTickSource)
+        //     .Each((Iter it, int i, ref Transform t, ref B2BodyId b) =>
+        //     {
+        //         var physicsPosition = _physicsSystem.GetPosition(b);
+        //         if (physicsPosition != t.Position)
+        //         {
+        //             t.Position = new Vector2(physicsPosition.X, physicsPosition.Y);
+        //         }
+        //     });
+
+        World.System<Transform, PhysicsPositionChanged>()
             .Kind(PostPhysics)
-            .TickSource(_fixedTickSource)
-            .Each((Iter it, int i, ref Transform t, ref B2BodyId b) =>
+            .Each((Iter it, int i, ref Transform t, ref PhysicsPositionChanged p) =>
             {
-                var physicsPosition = _physicsSystem.GetPosition(b);
-                if (physicsPosition != t.Position)
-                {
-                    t.Position = new Vector2(physicsPosition.X, physicsPosition.Y);
-                }
+                t.Position = p.Position;
+                it.Entity(i).Remove<PhysicsPositionChanged>();
             });
 
         World.System<Transform, Components.Rectangle>()
@@ -165,11 +166,7 @@ public class Game
 
         World.System("Draw")
             .Kind(OnDraw)
-            .Iter(() =>
-                {
-                    _renderSystem.Draw();
-                }
-            );
+            .Iter(_renderSystem.Draw);
 
         World.SetTargetFps(60);
     }
