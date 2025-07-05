@@ -1,5 +1,6 @@
 ﻿using SpaceGame.Infrastructure;
 using SpaceGame.Core.Components;
+using Box2D.NET;
 using Flecs.NET;
 using Flecs.NET.Bindings;
 using Flecs.NET.Core;
@@ -32,7 +33,7 @@ public class Game
         PreDraw = World.Entity().Add(Ecs.Phase).Add(Ecs.DependsOn, PostPhysics);
         OnDraw = World.Entity().Add(Ecs.Phase).Add(Ecs.DependsOn, PreDraw);
 
-        _fixedTickSource = World.Timer().Interval(.2f);
+        _fixedTickSource = World.Timer().Interval(.02f);
 
         _renderSystem = new(renderer);
         _movementSystem = new(_inputState);
@@ -54,19 +55,11 @@ public class Game
 
     private void Setup()
     {
-        World.Observer<PhysicsBody>()
+        World.Observer<PhysicsBody, Transform>()
             .Event(Ecs.OnSet)
-            .Each((Iter it, int i, ref PhysicsBody b) =>
+            .Each((Iter it, int i, ref PhysicsBody b, ref Transform t) =>
             {
-                if (it.Entity(i).Has<Transform>())
-                {
-                    var t = it.Entity(i).Get<Transform>();
-                    _physicsSystem.OnAdd(it.Entity(i), t.Position, b.Shape);
-                }
-                else
-                {
-                    _physicsSystem.OnAdd(it.Entity(i), Vector2.Zero, b.Shape);
-                }
+                _physicsSystem.OnAdd(it.Entity(i), t.Position, b.Shape);
             });
 
         World.Observer<PhysicsBody>()
@@ -122,10 +115,10 @@ public class Game
                     }
                 }
             });
-        
+
         World.System("Clear sprite batch")
             .Kind(Ecs.PreUpdate)
-            .Iter((Iter it) => _renderSystem.Clear());
+            .Iter(_renderSystem.Clear);
 
         World.System<Transform, Player>("Player movement")
             .Each((Iter it, int i, ref Transform t, ref Player p) =>
@@ -133,34 +126,34 @@ public class Game
                 _movementSystem.Update(p, t, it.DeltaTime());
             });
 
-        World.System<Transform, Box2DBodyId>("Physics update")
+        World.System<Transform, B2BodyId>("Physics forces")
             .Kind(PrePhysics)
             .TickSource(_fixedTickSource)
-            .Each((Iter it, int i, ref Transform t, ref Box2DBodyId b) =>
+            .Each((Iter it, int i, ref Transform t, ref B2BodyId b) =>
             {
                 if (t.Velocity != Vector2.Zero)
                 {
-                    _physicsSystem.ApplyForce(b.BodyId, t.Velocity);
+                    _physicsSystem.ApplyForce(b, t.Velocity);
                 }
             });
 
-        World.System()
+        World.System("Physics step")
             .Kind(OnPhysics)
             .TickSource(_fixedTickSource)
-            .Iter((Iter it) => {
+            .Iter(it => {
                 _physicsSystem.Update(it.DeltaTime());
             });
 
-        World.System<Transform, Box2DBodyId>("Update position from physics")
+        World.System<Transform, B2BodyId>("Update position from physics")
             .Kind(PostPhysics)
-            .Each((Iter it, int i, ref Transform t, ref Box2DBodyId b) =>
+            .TickSource(_fixedTickSource)
+            .Each((Iter it, int i, ref Transform t, ref B2BodyId b) =>
             {
-                var physicsPosition = _physicsSystem.GetPosition(b.BodyId);
+                var physicsPosition = _physicsSystem.GetPosition(b);
                 if (physicsPosition != t.Position)
                 {
                     t.Position = new Vector2(physicsPosition.X, physicsPosition.Y);
                 }
-                Console.WriteLine($"Entity {it.Entity(i).Name} position updated to {t.Position}");
             });
 
         World.System<Transform, Components.Rectangle>()
@@ -172,7 +165,11 @@ public class Game
 
         World.System("Draw")
             .Kind(OnDraw)
-            .Iter(_renderSystem.Draw);
+            .Iter(() =>
+                {
+                    _renderSystem.Draw();
+                }
+            );
 
         World.SetTargetFps(60);
     }

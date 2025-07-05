@@ -1,7 +1,6 @@
 using System.Numerics;
 using SpaceGame.Infrastructure;
 using Box2D.NET;
-using static Box2D.NET.B2Body;
 using static Box2D.NET.B2Bodies;
 using static Box2D.NET.B2Shapes;
 using static Box2D.NET.B2Worlds;
@@ -16,10 +15,8 @@ public class PhysicsSystem
     public PhysicsSystem(World world)
     {
         _world = world;
-        var worldDef = new B2WorldDef
-        {
-            gravity = new B2Vec2()
-        };
+        var worldDef = b2DefaultWorldDef();
+        worldDef.gravity = new B2Vec2(0, 0);
         WorldId = b2CreateWorld(ref worldDef);
     }
 
@@ -38,7 +35,7 @@ public class PhysicsSystem
         definition.type = B2BodyType.b2_dynamicBody;
         definition.position = new B2Vec2(position.X, position.Y);
         var body = b2CreateBody(WorldId, ref definition);
-                
+
         var shapeDef = b2DefaultShapeDef();
         shapeDef.density = 1f;
         shapeDef.material.friction = .5f;
@@ -55,19 +52,19 @@ public class PhysicsSystem
         };
         b2Body_SetMassData(body, massData);
 
-        id.Set(new Box2DBodyId { BodyId = body });
+        id.Set(body);
     }
 
     public void OnRemove(Entity id)
     {
-        var bodyId = id.Get<Box2DBodyId>();
+        var bodyId = id.Get<B2BodyId>();
         if (bodyId == null)
         {
             return;
         }
-        b2DestroyBody(bodyId.BodyId);
+        b2DestroyBody(bodyId);
 
-        id.Remove<Box2DBodyId>();
+        id.Remove<B2BodyId>();
     }
 
     public void Update(float deltaTime)
@@ -96,6 +93,6 @@ public class PhysicsSystem
 
     public void ApplyForce(B2BodyId id, Vector2 force)
     {
-        b2Body_ApplyForceToCenter(id, new B2Vec2(100, 0), true);
+        b2Body_ApplyForceToCenter(id, new B2Vec2(force.X, force.Y), true);
     }
 }
