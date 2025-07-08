@@ -1,5 +1,6 @@
 ﻿using SpaceGame.Infrastructure;
 using SpaceGame.SDLWrapper;
+using System.Numerics;
 using static SDL3.SDL;
 
 namespace SpaceGame.Renderer;
@@ -51,7 +52,7 @@ public class Renderer : IRenderer
                 Entrypoint = "main",
                 Format = GPUShaderFormat.SPIRV,
                 Stage = GPUShaderStage.Vertex,
-                NumUniformBuffers = 1
+                NumUniformBuffers = 2,
             }.ToSDL()
         ));
         using var rectFragmentShader = new FragmentShader(
@@ -63,6 +64,7 @@ public class Renderer : IRenderer
                 GPUShaderStage.Fragment
             ).ToSDL()
         ));
+
         var pipelineHandle = CreateGPUGraphicsPipeline(GpuDevice.Handle, new GraphicsPipelineCreateInfo()
         {
             VertexShader = rectVertexShader,
@@ -75,6 +77,11 @@ public class Renderer : IRenderer
                             Pitch = sizeof(float) * 6,
                             InputRate = GPUVertexInputRate.Vertex,
                             InstanceStepRate = 0
+                        },
+                        new GPUVertexBufferDescription() {
+                            Slot = 1,
+                            Pitch = sizeof(float) * 16,
+                            InputRate = GPUVertexInputRate.Instance
                         }],
                 VertexAttributes = [
                         new GPUVertexAttribute()
@@ -91,6 +98,13 @@ public class Renderer : IRenderer
                             Format = GPUVertexElementFormat.Float4,
                             Offset = sizeof(float) * 2
                         },
+                        new GPUVertexAttribute()
+                        {
+                            Location = 2,
+                            BufferSlot = 1,
+                            Format = GPUVertexElementFormat.Float4,
+                            Offset = sizeof(float) * 16
+                        }
                     ]
             },
             PrimitiveType = GPUPrimitiveType.TriangleList,
