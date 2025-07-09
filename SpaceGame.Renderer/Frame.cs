@@ -42,7 +42,39 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
         };
         UploadToGPUBuffer(pass.Handle, source, destination, false);
     }
-       
+    private unsafe void Upload<T>(CopyPass pass, List<T> data, IndexBuffer indexBuffer) where T : unmanaged
+    {
+        var size = sizeof(T) * data.Count;
+        var uploadBuffer = renderer.BorrowUploadBuffer(size);
+        var mappedBufferPtr = MapGPUTransferBuffer(renderer.GpuDevice.Handle, uploadBuffer.Buffer.Handle, true);
+        if (mappedBufferPtr == nint.Zero)
+        {
+            return;
+        }
+        var mappedBuffer = (T*)mappedBufferPtr;
+
+        for (var i = 0; i < data.Count; i++)
+        {
+            mappedBuffer[i] = data[i];
+        }
+
+        UnmapGPUTransferBuffer(renderer.GpuDevice.Handle, uploadBuffer.Buffer.Handle);
+        uploadBuffer.Return();
+
+        GPUTransferBufferLocation source = new()
+        {
+            TransferBuffer = uploadBuffer.Buffer.Handle,
+            Offset = 0,
+        };
+        GPUBufferRegion destination = new()
+        {
+            Buffer = indexBuffer.Handle,
+            Offset = 0,
+            Size = (uint)size
+        };
+        UploadToGPUBuffer(pass.Handle, source, destination, false);
+    }
+
     public unsafe void Draw(Rectangle rectangle)
     {
         _vertices.AddRange(rectangle.ToVertices());
@@ -61,44 +93,57 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
 
     private unsafe void DrawRectangle()
     {
-        //if (_rectVertices.Count == 0) return;
+        var vertexBuffer = renderer.BorrowVertexBuffer(sizeof(ColouredVertex) * 4);
+        var matrixBuffer = renderer.BorrowVertexBuffer(sizeof(Matrix4x4));
+        var indexBuffer = renderer.BorrowIndexBuffer(sizeof(short) * 6);
 
-        //var vertexSize = sizeof(float) * 6;
-        //var indexSize = sizeof(short) * _rectVertices.Count;
-        //var modelSize = sizeof(float) * 16 * _rectVertices.Count;
+        commandBuffer.WithCopyPass((cmd, pass) =>
+        {
+            Upload(
+                pass,
+                [
+                    new ColouredVertex(new Vector2(0f, 0f), new Vector4(0f, 0f, 1f, 1f)),
+                    new ColouredVertex(new Vector2(1f, 0f), new Vector4(0f, 0f, 1f, 1f)),
+                    new ColouredVertex(new Vector2(0f, 1f), new Vector4(0f, 0f, 1f, 1f)),
+                    new ColouredVertex(new Vector2(1f, 1f), new Vector4(0f, 0f, 1f, 1f)),
+                ],
+                vertexBuffer.Buffer
+            );
 
-        //var uploadIndexBuffer = renderer.BorrowUploadBuffer(indexSize);
-        //var uploadModelBuffer = renderer.BorrowUploadBuffer(modelSize);
+            Upload(
+                pass,
+                [
+                    Matrix4x4.Identity,
+                ],
+                matrixBuffer.Buffer
+            );
 
+            Upload(
+                pass,
+                [
+                    (short)0,
+                    (short)2,
+                    (short)3,
+                    (short)0,
+                    (short)3,
+                    (short)1,
+                ],
+                indexBuffer.Buffer
+            );
+        })
+        .WithRenderPass((cmd, pass) =>
+        {
+            renderer.IndexedColouredRectanglePipeline.Draw(cmd, pass, vertexBuffer.Buffer, indexBuffer.Buffer, matrixBuffer.Buffer, Matrix4x4.Identity, 1);
+        });
 
-        //commandBuffer.WithCopyPass((cmd, pass) =>
-        //{
-        //    Upload(pass, _vertices, )
-        //})
-        //.WithRenderPass((cmd, pass) =>
-        //{
-        //    var bufferBinding = new[] {
-        //        new GPUBufferBinding
-        //        {
-        //            Buffer = vertexBuffer.Buffer.Handle,
-        //            Offset = 0
-        //        }
-        //    };
+        vertexBuffer.Return();
+        indexBuffer.Return();
+        matrixBuffer.Return();
+    }
 
-        //    BindGPUGraphicsPipeline(pass.Handle, renderer.RectanglePipeline.Pipeline.Handle);
-        //    BindGPUVertexBuffers(pass.Handle, 0, bufferBinding, (uint)bufferBinding.Length);
-        //    var translate = Matrix4x4.CreateOrthographic(
-        //        cmd.SwapchainTexture.Width,
-        //        cmd.SwapchainTexture.Height,
-        //        -1,
-        //        1);
-        //    var translatePtr = (nint)(&translate);
-        //    PushGPUVertexUniformData(cmd.CommandBufferHandle, 0, translatePtr, (uint)sizeof(Matrix4x4));
-        //    DrawGPUPrimitives(pass.Handle, (uint)_vertices.Count, (uint)_vertices.Count / 6, 0, 0);
-        //});
+    private unsafe void CopyRectangle(CopyPass pass)
+    {
 
-        //uploadBuffer.Return();
-        //vertexBuffer.Return();
     }
 
     private unsafe void Draw()
@@ -106,7 +151,6 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
         var size = _vertices.Capacity * sizeof(ColouredVertex);
         if (size == 0) return;
 
-        var uploadBuffer = renderer.BorrowUploadBuffer(size);
         var vertexBuffer = renderer.BorrowVertexBuffer(size);
 
         commandBuffer.WithCopyPass((cmd, pass) =>
@@ -121,15 +165,15 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
                 -1,
                 1);
             renderer.ColouredRectanglePipeline.Draw(cmd, pass, vertexBuffer.Buffer, translate, _vertices.Count / 6);
-
-            uploadBuffer.Return();
-            vertexBuffer.Return();
         });
+
+        vertexBuffer.Return();
     }
 
     public void End()
     {
         Draw();
+        //DrawRectangle();
         commandBuffer.Submit();
     }
 }

@@ -2,6 +2,7 @@
 using static SDL3.SDL;
 using System.Numerics;
 using SpaceGame.Infrastructure;
+using SDL3;
 namespace SpaceGame.Renderer;
 
 public class IndexedColouredRectanglePipeline : IDisposable
@@ -25,9 +26,11 @@ public class IndexedColouredRectanglePipeline : IDisposable
                         },
                         new() {
                             Slot = 1,
-                            Pitch = SizeOf<Matrix4x4>(),
-                            InputRate = GPUVertexInputRate.Instance
-                        }],
+                            Pitch = sizeof(float) * 4 * 4,
+                            InputRate = GPUVertexInputRate.Instance,
+                            InstanceStepRate = 0
+                        }
+                        ],
                 VertexAttributes = [
                         new()
                         {
@@ -63,6 +66,11 @@ public class IndexedColouredRectanglePipeline : IDisposable
                     ]
             }
         });
+        if (pipelineHandle == nint.Zero)
+        {
+            var error = GetError();
+            throw new InvalidOperationException($"Failed to create graphics pipeline for indexed coloured rectangle. {error}");
+        }
         Pipeline = new GraphicsPipeline(gpuDevice, pipelineHandle);
     }
 
@@ -94,6 +102,7 @@ public class IndexedColouredRectanglePipeline : IDisposable
         BindGPUIndexBuffer(pass.Handle, indexBinding, GPUIndexElementSize.IndexElementSize16Bit);
         var viewProjectionPtr = (nint)(&viewProjection);
         PushGPUVertexUniformData(cmd.CommandBufferHandle, 0, viewProjectionPtr, (uint)sizeof(Matrix4x4));
+        PushGPUVertexUniformData(cmd.CommandBufferHandle, 1, viewProjectionPtr, (uint)sizeof(Matrix4x4));
         DrawGPUIndexedPrimitives(pass.Handle, (uint)numInstances * sizeof(short), (uint)numInstances, 0, 0, 0);
     }
 

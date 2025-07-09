@@ -18,6 +18,7 @@ public class Renderer : IRenderer
     private IGpuDevice _gpuDevice;
     private List<TransferBuffer> _uploadBuffers = [];
     private List<VertexBuffer> _vertexBuffers = [];
+    private List<IndexBuffer> _indexBuffers = [];
 
     public IWindow Window => _window;
     public IGpuDevice GpuDevice => _gpuDevice;
@@ -71,11 +72,36 @@ public class Renderer : IRenderer
             rectVertexShader,
             rectFragmentShader
         );
+
+
+        using var indexedRectVertexShader = new VertexShader(
+            GpuDevice.Handle,
+            CreateGPUShader(GpuDevice.Handle, new ShaderCreateInfo()
+            {
+                Code = Assets.Shaders.IndexedQuadVertex.Spirv,
+                Entrypoint = "main",
+                Format = GPUShaderFormat.SPIRV,
+                Stage = GPUShaderStage.Vertex,
+                NumUniformBuffers = 2,
+            }
+        ));
+        using var indexedRectFragmentShader = new FragmentShader(
+            GpuDevice.Handle,
+            CreateGPUShader(GpuDevice.Handle, new ShaderCreateInfo(
+                Assets.Shaders.IndexedQuadFragment.Spirv,
+                "main",
+                GPUShaderFormat.SPIRV,
+                GPUShaderStage.Fragment
+            )
+        ));
+
         IndexedColouredRectanglePipeline = new IndexedColouredRectanglePipeline(
             Window,
             GpuDevice,
-            rectVertexShader,
-            rectFragmentShader
+            indexedRectVertexShader,
+            indexedRectFragmentShader
+        //rectVertexShader,
+        //rectFragmentShader
         );
     }
 
@@ -122,6 +148,40 @@ public class Renderer : IRenderer
         }
 
         return new BorrowedBuffer<TransferBuffer>(buffer, _uploadBuffers);
+    }
+
+    private IndexBuffer CreateIndexBuffer(int size)
+    {
+        var indexBuffer = CreateGPUBuffer(_gpuDevice.Handle, new()
+        {
+            Usage = GPUBufferUsageFlags.Index,
+            Size = (uint)size
+        });
+
+        if (indexBuffer == nint.Zero)
+        {
+            throw new NullReferenceException("Transfer buffer is null pointer");
+        }
+
+        return new IndexBuffer(_gpuDevice, indexBuffer, size);
+    }
+
+    public BorrowedBuffer<IndexBuffer> BorrowIndexBuffer(int size)
+    {
+        IndexBuffer buffer;
+
+        if (_uploadBuffers.Count == 0)
+        {
+            buffer = CreateIndexBuffer(size);
+        }
+        else
+        {
+            buffer = _indexBuffers[0];
+            buffer.TryResize(size);
+            _uploadBuffers.RemoveAt(0);
+        }
+
+        return new BorrowedBuffer<IndexBuffer>(buffer, _indexBuffers);
     }
 
     private VertexBuffer CreateVertexBuffer(int size)
