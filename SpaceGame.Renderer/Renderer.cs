@@ -22,8 +22,8 @@ public class Renderer : IRenderer
     public IWindow Window => _window;
     public IGpuDevice GpuDevice => _gpuDevice;
 
-    private RectanglePipeline _rectanglePipeline;
-    public RectanglePipeline RectanglePipeline => _rectanglePipeline;
+    public ColouredRectanglePipeline ColouredRectanglePipeline { get; private set; }
+    public IndexedColouredRectanglePipeline IndexedColouredRectanglePipeline { get; private set; }
 
     public IFrame BeginFrame() => new Frame(
         AcquireCommandBuffer()
@@ -53,7 +53,7 @@ public class Renderer : IRenderer
                 Format = GPUShaderFormat.SPIRV,
                 Stage = GPUShaderStage.Vertex,
                 NumUniformBuffers = 2,
-            }.ToSDL()
+            }
         ));
         using var rectFragmentShader = new FragmentShader(
             GpuDevice.Handle,
@@ -62,67 +62,20 @@ public class Renderer : IRenderer
                 "main",
                 GPUShaderFormat.SPIRV,
                 GPUShaderStage.Fragment
-            ).ToSDL()
+            )
         ));
 
-        var pipelineHandle = CreateGPUGraphicsPipeline(GpuDevice.Handle, new GraphicsPipelineCreateInfo()
-        {
-            VertexShader = rectVertexShader,
-            FragmentShader = rectFragmentShader,
-            VertexInputState = new()
-            {
-                VertexBufferDescriptions = [
-                        new GPUVertexBufferDescription() {
-                            Slot = 0,
-                            Pitch = sizeof(float) * 6,
-                            InputRate = GPUVertexInputRate.Vertex,
-                            InstanceStepRate = 0
-                        },
-                        new GPUVertexBufferDescription() {
-                            Slot = 1,
-                            Pitch = sizeof(float) * 16,
-                            InputRate = GPUVertexInputRate.Instance
-                        }],
-                VertexAttributes = [
-                        new GPUVertexAttribute()
-                        {
-                            Location = 0,
-                            BufferSlot = 0,
-                            Format = GPUVertexElementFormat.Float2,
-                            Offset = 0
-                        },
-                        new GPUVertexAttribute()
-                        {
-                            Location = 1,
-                            BufferSlot = 0,
-                            Format = GPUVertexElementFormat.Float4,
-                            Offset = sizeof(float) * 2
-                        },
-                        new GPUVertexAttribute()
-                        {
-                            Location = 2,
-                            BufferSlot = 1,
-                            Format = GPUVertexElementFormat.Float4,
-                            Offset = sizeof(float) * 16
-                        }
-                    ]
-            },
-            PrimitiveType = GPUPrimitiveType.TriangleList,
-            TargetInfo = new()
-            {
-                ColorTargetDescriptions = [
-                        new()
-                        {
-                            Format=GetGPUSwapchainTextureFormat(GpuDevice.Handle, Window.Handle),
-                        }
-                    ]
-            }
-        }.ToSDL());
-
-        _rectanglePipeline = new RectanglePipeline(
-            new GraphicsPipeline(GpuDevice, pipelineHandle),
-            CreateTransferBuffer(sizeof(float) * 6, GPUTransferBufferUsage.Upload),
-            CreateVertexBuffer(sizeof(float) * 6 * 4)
+        ColouredRectanglePipeline = new ColouredRectanglePipeline(
+            Window,
+            GpuDevice,
+            rectVertexShader,
+            rectFragmentShader
+        );
+        IndexedColouredRectanglePipeline = new IndexedColouredRectanglePipeline(
+            Window,
+            GpuDevice,
+            rectVertexShader,
+            rectFragmentShader
         );
     }
 
@@ -214,7 +167,8 @@ public class Renderer : IRenderer
                 // TODO: dispose managed state (managed objects)
             }
 
-            RectanglePipeline?.Dispose();
+            ColouredRectanglePipeline?.Dispose();
+            IndexedColouredRectanglePipeline?.Dispose();
             _uploadBuffers.ForEach(b => b.Dispose());
             _uploadBuffers.Clear();
             _vertexBuffers.ForEach(b => b.Dispose());

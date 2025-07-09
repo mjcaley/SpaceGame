@@ -2,29 +2,21 @@
 
 namespace SpaceGame.SDLWrapper;
 
-public struct VertexInputState
+public struct VertexInputState(GPUVertexBufferDescription[] vertexBufferDescriptions, GPUVertexAttribute[] vertexAttributes)
 {
-    public VertexInputState(GPUVertexBufferDescription[] vertexBufferDescriptions, GPUVertexAttribute[] vertexAttributes)
-    {
-        VertexBufferDescriptions = vertexBufferDescriptions;
-        VertexAttributes = vertexAttributes;
-    }
-
-    public VertexInputState() : this(Array.Empty<GPUVertexBufferDescription>(), Array.Empty<GPUVertexAttribute>())
+    public VertexInputState() : this([], [])
     {
     }
 
-    public GPUVertexBufferDescription[] VertexBufferDescriptions { get; set; }
-    public GPUVertexAttribute[] VertexAttributes { get; set;  }
+    public GPUVertexBufferDescription[] VertexBufferDescriptions { get; set; } = vertexBufferDescriptions;
+    public GPUVertexAttribute[] VertexAttributes { get; set; } = vertexAttributes;
 
-    public GPUVertexInputState ToSDL()
-    {
-        return new()
+    public static implicit operator GPUVertexInputState(VertexInputState state)
+        => new()
         {
-            VertexBufferDescriptions = StructureArrayToPointer(VertexBufferDescriptions),
-            NumVertexBuffers = (uint)VertexBufferDescriptions.Length,
-            VertexAttributes = StructureArrayToPointer(VertexAttributes),
-            NumVertexAttributes = (uint)VertexAttributes.Length
+            VertexBufferDescriptions = StructureArrayToPointer(state.VertexBufferDescriptions),
+            NumVertexBuffers = (uint)state.VertexBufferDescriptions.Length,
+            VertexAttributes = StructureArrayToPointer(state.VertexAttributes),
+            NumVertexAttributes = (uint)state.VertexAttributes.Length
         };
-    }
 }

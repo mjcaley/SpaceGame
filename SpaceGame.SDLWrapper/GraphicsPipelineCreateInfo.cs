@@ -13,17 +13,15 @@ public struct GraphicsPipelineCreateInfo(VertexShader vertexShader, FragmentShad
     public GPUMultisampleState MultisampleState { get; set; } = default;
     public GraphicsPipelineTargetInfo TargetInfo { get; set; } = new();
 
-    public GPUGraphicsPipelineCreateInfo ToSDL()
-    {
-        return new()
+    public static implicit operator GPUGraphicsPipelineCreateInfo(GraphicsPipelineCreateInfo info)
+        => new()
         {
-            VertexShader = VertexShader.Handle,
-            FragmentShader = FragmentShader.Handle,
-            VertexInputState = VertexInputState.ToSDL(),
-            PrimitiveType = PrimitiveType,
-            RasterizerState = RasterizerState,
-            MultisampleState = MultisampleState,
-            TargetInfo = TargetInfo.ToSDL()
+            VertexShader = info.VertexShader.Handle,
+            FragmentShader = info.FragmentShader.Handle,
+            VertexInputState = info.VertexInputState,
+            PrimitiveType = info.PrimitiveType,
+            RasterizerState = info.RasterizerState,
+            MultisampleState = info.MultisampleState,
+            TargetInfo = info.TargetInfo
         };
-    }
 }

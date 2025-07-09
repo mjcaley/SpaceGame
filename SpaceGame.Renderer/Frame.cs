@@ -45,17 +45,17 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
        
     public unsafe void Draw(Rectangle rectangle)
     {
+        _vertices.AddRange(rectangle.ToVertices());
+    }
+
+    public unsafe void Draw(Vector3 position, Rectangle rectangle)
+    {
         // Need buffers
         // 1 Vertex buffer for 6 vertices
         // 1 Index buffer the size of all vertices
         // 1 Vertex buffer to store matrix 4x4 for model transformation
         // 1 uniform matrix4x4 for view * projection matrix
         // OR 2 uniform matrix4x4 for view and projection matrices
-        //_vertices.AddRange(rectangle.ToVertices());
-    }
-
-    public unsafe void Draw(Vector3 position, Rectangle rectangle)
-    {
         _rectVertices.Add((position, rectangle));
     }
 
@@ -115,28 +115,16 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
         })
         .WithRenderPass((cmd, pass) =>
         {
-            var bufferBinding = new[] {
-                new GPUBufferBinding
-                {
-                    Buffer = vertexBuffer.Buffer.Handle,
-                    Offset = 0
-                }
-            };
-
-            BindGPUGraphicsPipeline(pass.Handle, renderer.RectanglePipeline.Pipeline.Handle);
-            BindGPUVertexBuffers(pass.Handle, 0, bufferBinding, (uint)bufferBinding.Length);
             var translate = Matrix4x4.CreateOrthographic(
                 cmd.SwapchainTexture.Width,
                 cmd.SwapchainTexture.Height,
                 -1,
                 1);
-            var translatePtr = (nint)(&translate);
-            PushGPUVertexUniformData(cmd.CommandBufferHandle, 0, translatePtr, (uint)sizeof(Matrix4x4));
-            DrawGPUPrimitives(pass.Handle, (uint)_vertices.Count, (uint)_vertices.Count / 6, 0, 0);
-        });
+            renderer.ColouredRectanglePipeline.Draw(cmd, pass, vertexBuffer.Buffer, translate, _vertices.Count / 6);
 
-        uploadBuffer.Return();
-        vertexBuffer.Return();
+            uploadBuffer.Return();
+            vertexBuffer.Return();
+        });
     }
 
     public void End()

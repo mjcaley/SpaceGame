@@ -13,19 +13,16 @@ public struct ShaderCreateInfo(byte[] code, string entryPoint, GPUShaderFormat s
     public uint NumStorageTextures { get; set; } = 0;
     public uint NumUniformBuffers { get; set; } = 0;
 
-    public GPUShaderCreateInfo ToSDL()
+    public static implicit operator GPUShaderCreateInfo(ShaderCreateInfo info) => new()
     {
-        return new()
-        {
-            CodeSize = (nuint)Code.Length,
-            Code = StructureArrayToPointer(Code),
-            Entrypoint = StringToPointer(Entrypoint),
-            Format = Format,
-            Stage = Stage,
-            NumSamplers = (uint)NumSamplers,
-            NumStorageBuffers = NumStorageBuffers,
-            NumStorageTextures = NumStorageTextures,
-            NumUniformBuffers = NumUniformBuffers
-        };
-    }
+        CodeSize = (nuint)info.Code.Length,
+        Code = StructureArrayToPointer(info.Code),
+        Entrypoint = StringToPointer(info.Entrypoint),
+        Format = info.Format,
+        Stage = info.Stage,
+        NumSamplers = (uint)info.NumSamplers,
+        NumStorageBuffers = info.NumStorageBuffers,
+        NumStorageTextures = info.NumStorageTextures,
+        NumUniformBuffers = info.NumUniformBuffers
+    };
 }
