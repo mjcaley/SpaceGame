@@ -44,12 +44,41 @@ public class CommandBufferWithSwapchain(nint commandBufferHandle, SwapchainTextu
 
         return this;
     }
+
     public CommandBufferWithSwapchain WithRenderPass(Action<CommandBufferWithSwapchain, RenderPass> func)
     {
         var renderPassHandle = BeginGPURenderPass(
             CommandBufferHandle,
             StructureArrayToPointer(ColorTargetInfo),
             (uint)ColorTargetInfo.Length,
+            nint.Zero);
+        if (renderPassHandle == nint.Zero)
+        {
+            return this;
+        }
+        var renderPass = new RenderPass(renderPassHandle);
+
+        func(this, renderPass);
+
+        EndGPURenderPass(renderPass.Handle);
+
+        return this;
+    }
+
+    public CommandBufferWithSwapchain WithRenderPass(GPULoadOp loadOp, GPUStoreOp storeOp, Action<CommandBufferWithSwapchain, RenderPass> func)
+    {
+        var colourTargetInfo = new GPUColorTargetInfo
+        {
+            Texture = SwapchainTexture.Handle,
+            ClearColor = new FColor { R = 0.5f, G = 0, B = 0.5f, A = 1.0f },
+            LoadOp = loadOp,
+            StoreOp = storeOp
+        };
+
+        var renderPassHandle = BeginGPURenderPass(
+            CommandBufferHandle,
+            StructureToPointer<GPUColorTargetInfo>(colourTargetInfo),
+            1,
             nint.Zero);
         if (renderPassHandle == nint.Zero)
         {

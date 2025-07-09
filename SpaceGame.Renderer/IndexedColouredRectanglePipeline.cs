@@ -103,7 +103,7 @@ public class IndexedColouredRectanglePipeline : IDisposable
         var viewProjectionPtr = (nint)(&viewProjection);
         PushGPUVertexUniformData(cmd.CommandBufferHandle, 0, viewProjectionPtr, (uint)sizeof(Matrix4x4));
         PushGPUVertexUniformData(cmd.CommandBufferHandle, 1, viewProjectionPtr, (uint)sizeof(Matrix4x4));
-        DrawGPUIndexedPrimitives(pass.Handle, (uint)numInstances * sizeof(short), (uint)numInstances, 0, 0, 0);
+        DrawGPUIndexedPrimitives(pass.Handle, (uint)numInstances * 6, (uint)numInstances, 0, 0, 0);
     }
 
     public void Dispose()

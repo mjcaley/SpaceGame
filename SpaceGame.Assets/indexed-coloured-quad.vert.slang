@@ -18,9 +18,10 @@ ConstantBuffer<float4x4> Projection;
 [shader("vertex")]
 func main(vertex: AssembledVertex, model: float4x4) -> VertexOutput {
     VertexOutput output;
-    output.position = mul(model, float4(vertex.position, 0.0f, 1.0f));
-    output.position = mul(View, output.position);
-    output.position = mul(Projection, output.position);
+    //output.position = mul(model, float4(vertex.position, 0.0f, 1.0f));
+    //output.position = mul(View, output.position);
+    //output.position = mul(Projection, output.position);
+    output.position = float4(vertex.position, 0.0f, 1.0f);
     output.color = vertex.color;
     
     return output;
