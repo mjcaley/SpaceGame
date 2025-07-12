@@ -76,7 +76,7 @@ public class IndexedColouredRectanglePipeline : IDisposable
 
     public GraphicsPipeline Pipeline { get; }
 
-    public unsafe void Draw(CommandBufferWithSwapchain cmd, RenderPass pass, VertexBuffer vertices, IndexBuffer indices, VertexBuffer models, Matrix4x4 viewProjection, int numInstances)
+    public unsafe void Draw(CommandBufferWithSwapchain cmd, RenderPass pass, VertexBuffer vertices, IndexBuffer indices, VertexBuffer models, Matrix4x4 view, Matrix4x4 projection, int numInstances)
     {
         var vertexBindings = new[] {
                 new GPUBufferBinding
@@ -100,9 +100,10 @@ public class IndexedColouredRectanglePipeline : IDisposable
         BindGPUGraphicsPipeline(pass.Handle, Pipeline.Handle);
         BindGPUVertexBuffers(pass.Handle, 0, vertexBindings, (uint)vertexBindings.Length);
         BindGPUIndexBuffer(pass.Handle, indexBinding, GPUIndexElementSize.IndexElementSize16Bit);
-        var viewProjectionPtr = (nint)(&viewProjection);
-        PushGPUVertexUniformData(cmd.CommandBufferHandle, 0, viewProjectionPtr, (uint)sizeof(Matrix4x4));
-        PushGPUVertexUniformData(cmd.CommandBufferHandle, 1, viewProjectionPtr, (uint)sizeof(Matrix4x4));
+        var viewPtr = (nint)(&view);
+        var projectionPtr = (nint)(&projection);
+        PushGPUVertexUniformData(cmd.CommandBufferHandle, 0, viewPtr, (uint)sizeof(Matrix4x4));
+        PushGPUVertexUniformData(cmd.CommandBufferHandle, 1, projectionPtr, (uint)sizeof(Matrix4x4));
         DrawGPUIndexedPrimitives(pass.Handle, (uint)numInstances * 6, (uint)numInstances, 0, 0, 0);
     }
 
