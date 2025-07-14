@@ -47,6 +47,7 @@ public class IndexedColouredRectanglePipeline : IDisposable
                             Format = GPUVertexElementFormat.Float4,
                             Offset = sizeof(float) * 2
                         },
+                        // matrix 4x4
                         new()
                         {
                             Location = 2,
@@ -123,13 +124,9 @@ public class IndexedColouredRectanglePipeline : IDisposable
         BindGPUGraphicsPipeline(pass.Handle, Pipeline.Handle);
         fixed (Camera* cameraPtr = &camera)
         {
-            // var cameraPtr = (nint)(&camera);
             PushGPUVertexUniformData(cmd.CommandBufferHandle, 0, (nint)cameraPtr, (uint)sizeof(Camera));
             BindGPUVertexBuffers(pass.Handle, 0, vertexBindings, (uint)vertexBindings.Length);
             BindGPUIndexBuffer(pass.Handle, indexBinding, GPUIndexElementSize.IndexElementSize16Bit);
-            // var viewPtr = (nint)(&view);
-            // var projectionPtr = (nint)(&projection);
-            // PushGPUVertexUniformData(cmd.CommandBufferHandle, 1, projectionPtr, (uint)sizeof(Matrix4x4));
             DrawGPUIndexedPrimitives(pass.Handle, (uint)numInstances * 6, (uint)numInstances, 0, 0, 0);
         }
         PopGPUDebugGroup(cmd.CommandBufferHandle);

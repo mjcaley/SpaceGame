@@ -102,10 +102,10 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
             Upload(
                 pass,
                 [
-                    new ColouredVertex(new Vector2(0f, 0f), new Vector4(0f, 0f, 1f, 1f)),
-                    new ColouredVertex(new Vector2(1f, 0f), new Vector4(0f, 0f, 1f, 1f)),
-                    new ColouredVertex(new Vector2(0f, 1f), new Vector4(0f, 0f, 1f, 1f)),
-                    new ColouredVertex(new Vector2(1f, 1f), new Vector4(0f, 0f, 1f, 1f)),
+                    new ColouredVertex(new Vector2(0f, 0f), new Vector4(0f, 1f, 0f, 1f)),
+                    new ColouredVertex(new Vector2(1f, 0f), new Vector4(0f, 1f, 0f, 1f)),
+                    new ColouredVertex(new Vector2(0f, 1f), new Vector4(0f, 1f, 0f, 1f)),
+                    new ColouredVertex(new Vector2(1f, 1f), new Vector4(0f, 1f, 0f, 1f)),
                 ],
                 vertexBuffer.Buffer
             );
@@ -133,7 +133,7 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
         })
         .WithRenderPass(GPULoadOp.DontCare, GPUStoreOp.Store, (cmd, pass) =>
         {
-            var camera = new Camera(Matrix4x4.Identity, Matrix4x4.Identity);
+            var camera = new Camera(Matrix4x4.CreateOrthographic(1024f, 768f, .01f, 100f), Matrix4x4.CreateScale(16f));
             renderer.IndexedColouredRectanglePipeline.Draw(cmd, pass, vertexBuffer.Buffer, indexBuffer.Buffer, matrixBuffer.Buffer, ref camera, 1);
         });
 
