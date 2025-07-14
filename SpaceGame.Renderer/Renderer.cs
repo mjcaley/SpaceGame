@@ -82,7 +82,7 @@ public class Renderer : IRenderer
                 Entrypoint = "main",
                 Format = GPUShaderFormat.SPIRV,
                 Stage = GPUShaderStage.Vertex,
-                NumUniformBuffers = 2,
+                NumUniformBuffers = 1,
             }
         ));
         using var indexedRectFragmentShader = new FragmentShader(
@@ -100,8 +100,6 @@ public class Renderer : IRenderer
             GpuDevice,
             indexedRectVertexShader,
             indexedRectFragmentShader
-        //rectVertexShader,
-        //rectFragmentShader
         );
     }
 

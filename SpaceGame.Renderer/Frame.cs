@@ -133,7 +133,8 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
         })
         .WithRenderPass(GPULoadOp.DontCare, GPUStoreOp.Store, (cmd, pass) =>
         {
-            renderer.IndexedColouredRectanglePipeline.Draw(cmd, pass, vertexBuffer.Buffer, indexBuffer.Buffer, matrixBuffer.Buffer, Matrix4x4.Identity, Matrix4x4.Identity, 1);
+            var camera = new Camera(Matrix4x4.Identity, Matrix4x4.Identity);
+            renderer.IndexedColouredRectanglePipeline.Draw(cmd, pass, vertexBuffer.Buffer, indexBuffer.Buffer, matrixBuffer.Buffer, ref camera, 1);
         });
 
         vertexBuffer.Return();

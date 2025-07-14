@@ -2,6 +2,7 @@ struct AssembledVertex
 {
     float2 position : POSITION;
     float4 color : COLOR;
+    float4x4 model;
 };
 
 struct VertexOutput
@@ -10,18 +11,21 @@ struct VertexOutput
     float4 color : COLOR;
 };
 
+struct Camera
+{
+    float4x4 view;
+    float4x4 projection;
+};
+
 [[vk::binding(0, 1)]]
-ConstantBuffer<float4x4> View;
-[[vk::binding(0, 2)]]
-ConstantBuffer<float4x4> Projection;
+uniform ConstantBuffer<Camera> camera;
 
 [shader("vertex")]
-func main(vertex: AssembledVertex, model: float4x4) -> VertexOutput {
+func main(vertex: AssembledVertex) -> VertexOutput {
     VertexOutput output;
-    //output.position = mul(model, float4(vertex.position, 0.0f, 1.0f));
-    //output.position = mul(View, output.position);
-    //output.position = mul(Projection, output.position);
-    output.position = float4(vertex.position, 0.0f, 1.0f);
+    output.position = mul(vertex.model, float4(vertex.position, 0.0f, 1.0f));
+    output.position = mul(camera.view, output.position);
+    output.position = mul(camera.projection, output.position);
     output.color = vertex.color;
     
     return output;

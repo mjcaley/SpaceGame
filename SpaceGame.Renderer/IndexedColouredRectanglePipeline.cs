@@ -3,6 +3,7 @@ using static SDL3.SDL;
 using System.Numerics;
 using SpaceGame.Infrastructure;
 using SDL3;
+using Slang;
 namespace SpaceGame.Renderer;
 
 public class IndexedColouredRectanglePipeline : IDisposable
@@ -20,13 +21,13 @@ public class IndexedColouredRectanglePipeline : IDisposable
                 VertexBufferDescriptions = [
                         new() {
                             Slot = 0,
-                            Pitch = sizeof(float) * 6,
+                            Pitch = SizeOf<ColouredVertex>(),
                             InputRate = GPUVertexInputRate.Vertex,
                             InstanceStepRate = 0
                         },
                         new() {
                             Slot = 1,
-                            Pitch = sizeof(float) * 4 * 4,
+                            Pitch = SizeOf<Matrix4x4>(),
                             InputRate = GPUVertexInputRate.Instance,
                             InstanceStepRate = 0
                         }
@@ -52,6 +53,27 @@ public class IndexedColouredRectanglePipeline : IDisposable
                             BufferSlot = 1,
                             Format = GPUVertexElementFormat.Float4,
                             Offset = 0
+                        },
+                        new()
+                        {
+                            Location = 3,
+                            BufferSlot = 1,
+                            Format = GPUVertexElementFormat.Float4,
+                            Offset = sizeof(float) * 4
+                        },
+                        new()
+                        {
+                            Location = 4,
+                            BufferSlot = 1,
+                            Format = GPUVertexElementFormat.Float4,
+                            Offset = sizeof(float) * 8
+                        },
+                        new()
+                        {
+                            Location = 5,
+                            BufferSlot = 1,
+                            Format = GPUVertexElementFormat.Float4,
+                            Offset = sizeof(float) * 12
                         }
                     ]
             },
@@ -76,8 +98,9 @@ public class IndexedColouredRectanglePipeline : IDisposable
 
     public GraphicsPipeline Pipeline { get; }
 
-    public unsafe void Draw(CommandBufferWithSwapchain cmd, RenderPass pass, VertexBuffer vertices, IndexBuffer indices, VertexBuffer models, Matrix4x4 view, Matrix4x4 projection, int numInstances)
+    public unsafe void Draw(CommandBufferWithSwapchain cmd, RenderPass pass, VertexBuffer vertices, IndexBuffer indices, VertexBuffer models, ref Camera camera, int numInstances)
     {
+        PushGPUDebugGroup(cmd.CommandBufferHandle, "IndexedColouredRectanglePipeline.Draw()");
         var vertexBindings = new[] {
                 new GPUBufferBinding
                 {
@@ -98,13 +121,18 @@ public class IndexedColouredRectanglePipeline : IDisposable
         };
 
         BindGPUGraphicsPipeline(pass.Handle, Pipeline.Handle);
-        BindGPUVertexBuffers(pass.Handle, 0, vertexBindings, (uint)vertexBindings.Length);
-        BindGPUIndexBuffer(pass.Handle, indexBinding, GPUIndexElementSize.IndexElementSize16Bit);
-        var viewPtr = (nint)(&view);
-        var projectionPtr = (nint)(&projection);
-        PushGPUVertexUniformData(cmd.CommandBufferHandle, 0, viewPtr, (uint)sizeof(Matrix4x4));
-        PushGPUVertexUniformData(cmd.CommandBufferHandle, 1, projectionPtr, (uint)sizeof(Matrix4x4));
-        DrawGPUIndexedPrimitives(pass.Handle, (uint)numInstances * 6, (uint)numInstances, 0, 0, 0);
+        fixed (Camera* cameraPtr = &camera)
+        {
+            // var cameraPtr = (nint)(&camera);
+            PushGPUVertexUniformData(cmd.CommandBufferHandle, 0, (nint)cameraPtr, (uint)sizeof(Camera));
+            BindGPUVertexBuffers(pass.Handle, 0, vertexBindings, (uint)vertexBindings.Length);
+            BindGPUIndexBuffer(pass.Handle, indexBinding, GPUIndexElementSize.IndexElementSize16Bit);
+            // var viewPtr = (nint)(&view);
+            // var projectionPtr = (nint)(&projection);
+            // PushGPUVertexUniformData(cmd.CommandBufferHandle, 1, projectionPtr, (uint)sizeof(Matrix4x4));
+            DrawGPUIndexedPrimitives(pass.Handle, (uint)numInstances * 6, (uint)numInstances, 0, 0, 0);
+        }
+        PopGPUDebugGroup(cmd.CommandBufferHandle);
     }
 
     public void Dispose()
