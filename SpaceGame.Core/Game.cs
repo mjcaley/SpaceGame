@@ -43,14 +43,14 @@ public class Game
     private void AddMockEntities()
     {
         World.Entity("Player")
-            .Set(new Transform { Position = new Vector2(100f, 100f) })
-            .Set(new PhysicsBody { Shape = new Circle() { Center = Vector2.Zero, Radius = 10f } })
-            .Set(new Components.Rectangle { Layer = Layer.Foreground, Colour = new Vector4(0f, 0f, 1.0f, 1.0f), Size = new Vector2(16, 16) })
+            .Set(new Transform { Position = new Vector2(-10f, 0f) })
+            .Set(new PhysicsBody { Shape = new Circle() { Center = Vector2.Zero, Radius = 1f } })
+            .Set(new Components.Rectangle { Layer = Layer.Foreground, Origin = Vector2.Zero, Size = new Vector2(1f, 1f), Colour = new Vector4(.5f, .5f, 0f, 1.0f) })
             .Set(new Player { Speed = 100f });
 
         World.Entity("Enemy")
-            .Set(new Transform { Position = Vector2.Zero })
-            .Set(new Components.Rectangle { Layer = Layer.Foreground, Colour = new Vector4(1.0f, 0f, 0f, 1.0f), Size = new Vector2(16f, 16f) });
+            .Set(new Transform { Position = new Vector2(10f, 0f) })
+            .Set(new Components.Rectangle { Layer = Layer.Foreground, Colour = new Vector4(1.0f, 0f, 0f, 1.0f), Size = new Vector2(1f, 1f) });
     }
 
     private void Setup()

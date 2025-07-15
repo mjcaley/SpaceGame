@@ -97,6 +97,31 @@ public class IndexedColouredRectanglePipeline : IDisposable
 
     public GraphicsPipeline Pipeline { get; }
 
+    public unsafe void Draw(CommandBufferWithSwapchain cmd, RenderPass pass, VertexBuffer vertices, VertexBuffer models, ref Camera camera, int numInstances)
+    {
+        var vertexBindings = new[]{
+            new GPUBufferBinding
+            {
+                Buffer = vertices.Handle,
+                Offset = 0
+            },
+            new GPUBufferBinding
+            {
+                Buffer = models.Handle,
+                Offset = 0
+            }
+        };
+
+        fixed (Camera* cameraPtr = &camera)
+        {
+            BindGPUGraphicsPipeline(pass.Handle, Pipeline.Handle);
+            BindGPUVertexBuffers(pass.Handle, 0, vertexBindings, 1);
+            PushGPUVertexUniformData(cmd.CommandBufferHandle, 0, (nint)cameraPtr, (uint)sizeof(Camera));
+            DrawGPUPrimitives(pass.Handle, (uint)numInstances * sizeof(float) * 6, (uint)numInstances, 0, 0);
+        }
+
+    }
+
     public unsafe void Draw(CommandBufferWithSwapchain cmd, RenderPass pass, VertexBuffer vertices, IndexBuffer indices, VertexBuffer models, ref Camera camera, int numInstances)
     {
         PushGPUDebugGroup(cmd.CommandBufferHandle, "IndexedColouredRectanglePipeline.Draw()");

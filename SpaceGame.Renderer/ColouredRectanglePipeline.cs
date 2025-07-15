@@ -6,6 +6,8 @@ namespace SpaceGame.Renderer;
 
 public class ColouredRectanglePipeline : IDisposable
 {
+    private static unsafe uint SizeOf<T>() where T : unmanaged => (uint)sizeof(T);
+
     public ColouredRectanglePipeline(IWindow window, IGpuDevice gpuDevice, VertexShader vertexShader, FragmentShader fragmentShader)
     {
         var pipelineHandle = CreateGPUGraphicsPipeline(gpuDevice.Handle, new GraphicsPipelineCreateInfo()
@@ -17,8 +19,14 @@ public class ColouredRectanglePipeline : IDisposable
                 VertexBufferDescriptions = [
                         new() {
                             Slot = 0,
-                            Pitch = sizeof(float) * 6,
+                            Pitch = SizeOf<ColouredVertex>(),
                             InputRate = GPUVertexInputRate.Vertex,
+                            InstanceStepRate = 0
+                        },
+                        new() {
+                            Slot = 1,
+                            Pitch = SizeOf<Matrix4x4>(),
+                            InputRate = GPUVertexInputRate.Instance,
                             InstanceStepRate = 0
                         }],
                 VertexAttributes = [
@@ -35,6 +43,35 @@ public class ColouredRectanglePipeline : IDisposable
                             BufferSlot = 0,
                             Format = GPUVertexElementFormat.Float4,
                             Offset = sizeof(float) * 2
+                        },
+                        // matrix 4x4
+                        new()
+                        {
+                            Location = 2,
+                            BufferSlot = 1,
+                            Format = GPUVertexElementFormat.Float4,
+                            Offset = 0
+                        },
+                        new()
+                        {
+                            Location = 3,
+                            BufferSlot = 1,
+                            Format = GPUVertexElementFormat.Float4,
+                            Offset = sizeof(float) * 4
+                        },
+                        new()
+                        {
+                            Location = 4,
+                            BufferSlot = 1,
+                            Format = GPUVertexElementFormat.Float4,
+                            Offset = sizeof(float) * 8
+                        },
+                        new()
+                        {
+                            Location = 5,
+                            BufferSlot = 1,
+                            Format = GPUVertexElementFormat.Float4,
+                            Offset = sizeof(float) * 12
                         }]
             },
             PrimitiveType = GPUPrimitiveType.TriangleList,
@@ -53,21 +90,30 @@ public class ColouredRectanglePipeline : IDisposable
 
     public GraphicsPipeline Pipeline { get; }
 
-    public unsafe void Draw(CommandBufferWithSwapchain cmd, RenderPass pass, VertexBuffer vertices, Matrix4x4 modelViewProjection, int numInstances)
+    public unsafe void Draw(CommandBufferWithSwapchain cmd, RenderPass pass, VertexBuffer vertices, VertexBuffer models, ref Camera camera, int numInstances)
     {
-        var vertexBindings = new[]{
+        PushGPUDebugGroup(cmd.CommandBufferHandle, "ColouredRectanglePipeline.Draw");
+        var vertexBindings = new[] {
             new GPUBufferBinding
             {
                 Buffer = vertices.Handle,
                 Offset = 0
+            },
+            new GPUBufferBinding
+            {
+                Buffer = models.Handle,
+                Offset = 0
             }
         };
 
-        BindGPUGraphicsPipeline(pass.Handle, Pipeline.Handle);
-        BindGPUVertexBuffers(pass.Handle, 0, vertexBindings, 1);
-        var viewProjectionPtr = (nint)(&modelViewProjection);
-        PushGPUVertexUniformData(cmd.CommandBufferHandle, 0, viewProjectionPtr, (uint)sizeof(Matrix4x4));
-        DrawGPUPrimitives(pass.Handle, (uint)numInstances * sizeof(float) * 6, (uint)numInstances, 0, 0);
+        fixed (Camera* cameraPtr = &camera)
+        {
+            BindGPUGraphicsPipeline(pass.Handle, Pipeline.Handle);
+            BindGPUVertexBuffers(pass.Handle, 0, vertexBindings, (uint)vertexBindings.Length);
+            PushGPUVertexUniformData(cmd.CommandBufferHandle, 0, (nint)cameraPtr, (uint)sizeof(Camera));
+            DrawGPUPrimitives(pass.Handle, (uint)numInstances * 6, (uint)numInstances, 0, 0);
+        }
+        PopGPUDebugGroup(cmd.CommandBufferHandle);
     }
 
     public void Dispose()

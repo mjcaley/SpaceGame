@@ -42,11 +42,11 @@ namespace SpaceGame.Core
             {
                 var rect = new Infrastructure.Rectangle()
                 {
-                    Origin = transform.Position - rectangle.Size / 2,
+                    Origin = rectangle.Origin,
                     Size = rectangle.Size,
                     Colour = rectangle.Colour
                 };
-                frame.Draw(rect);
+                frame.Draw(rect, new Transformation { Translate = transform.Position });
             }
             frame.End();
         }

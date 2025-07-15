@@ -9,6 +9,10 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
 {
     private readonly List<ColouredVertex> _vertices = [];
     private readonly List<(Vector3, Rectangle)> _rectVertices = [];
+    private readonly List<ColouredVertexModel> _colouredVertices = [];
+
+    private readonly List<BorrowedBuffer<VertexBuffer>> _borrowedVertexBuffers = [];
+    private readonly List<BorrowedBuffer<IndexBuffer>> _borrowedIndexBuffers = [];
 
     private unsafe void Upload<T>(CopyPass pass, List<T> data, VertexBuffer vertexBuffer) where T : unmanaged
     {
@@ -42,6 +46,7 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
         };
         UploadToGPUBuffer(pass.Handle, source, destination, false);
     }
+
     private unsafe void Upload<T>(CopyPass pass, List<T> data, IndexBuffer indexBuffer) where T : unmanaged
     {
         var size = sizeof(T) * data.Count;
@@ -75,9 +80,20 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
         UploadToGPUBuffer(pass.Handle, source, destination, false);
     }
 
-    public unsafe void Draw(Rectangle rectangle)
+    public void Draw(Rectangle rectangle, Transformation transformation)
     {
-        _vertices.AddRange(rectangle.ToVertices());
+        Console.WriteLine($"Rectangle draw colour is {rectangle.Colour}");
+        var vertices = rectangle.ToVertices();
+        var model = Matrix4x4.CreateTranslation(new Vector3(transformation.Translate.X, transformation.Translate.Y, 0f));
+        _colouredVertices.Add(new() {
+            V1 = vertices[0],
+            V2 = vertices[1],
+            V3 = vertices[2],
+            V4 = vertices[3],
+            V5 = vertices[4],
+            V6 = vertices[5],
+            Model = model
+        });
     }
 
     public unsafe void Draw(Vector3 position, Rectangle rectangle)
@@ -94,8 +110,11 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
     private unsafe void DrawRectangle()
     {
         var vertexBuffer = renderer.BorrowVertexBuffer(sizeof(ColouredVertex) * 4);
+        _borrowedVertexBuffers.Add(vertexBuffer);
         var matrixBuffer = renderer.BorrowVertexBuffer(sizeof(Matrix4x4));
+        _borrowedVertexBuffers.Add(matrixBuffer);
         var indexBuffer = renderer.BorrowIndexBuffer(sizeof(short) * 6);
+        _borrowedIndexBuffers.Add(indexBuffer);
 
         commandBuffer.WithCopyPass((cmd, pass) =>
         {
@@ -136,40 +155,37 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
             var camera = new Camera(Matrix4x4.CreateOrthographic(1024f, 768f, .01f, 100f), Matrix4x4.CreateScale(16f));
             renderer.IndexedColouredRectanglePipeline.Draw(cmd, pass, vertexBuffer.Buffer, indexBuffer.Buffer, matrixBuffer.Buffer, ref camera, 1);
         });
-
-        vertexBuffer.Return();
-        indexBuffer.Return();
-        matrixBuffer.Return();
     }
 
     private unsafe void Draw()
     {
-        var size = _vertices.Capacity * sizeof(ColouredVertex);
-        if (size == 0) return;
+        var instances = _colouredVertices.Count;
+        if (instances == 0) return;
 
-        var vertexBuffer = renderer.BorrowVertexBuffer(size);
+        var vertexBuffer = renderer.BorrowVertexBuffer(instances * sizeof(ColouredVertex) * 6);
+        _borrowedVertexBuffers.Add(vertexBuffer);
+        var modelBuffer = renderer.BorrowVertexBuffer(instances * sizeof(Matrix4x4));
+        _borrowedVertexBuffers.Add(modelBuffer);
 
         commandBuffer.WithCopyPass((cmd, pass) =>
         {
-            Upload(pass, _vertices, vertexBuffer.Buffer);
+            Upload(pass, _colouredVertices.Select(v => new List<ColouredVertex> { v.V1, v.V2, v.V3, v.V4, v.V5, v.V6 }).SelectMany(v => v).ToList(), vertexBuffer.Buffer);
+            Upload(pass, _colouredVertices.Select(v => v.Model).ToList(), modelBuffer.Buffer);
         })
         .WithRenderPass((cmd, pass) =>
         {
-            var translate = Matrix4x4.CreateOrthographic(
-                cmd.SwapchainTexture.Width,
-                cmd.SwapchainTexture.Height,
-                -1,
-                1);
-            renderer.ColouredRectanglePipeline.Draw(cmd, pass, vertexBuffer.Buffer, translate, _vertices.Count / 6);
+            var camera = new Camera(Matrix4x4.CreateOrthographic(1024f, 768f, .01f, 100f), Matrix4x4.CreateScale(16f));
+            renderer.ColouredRectanglePipeline.Draw(cmd, pass, vertexBuffer.Buffer, modelBuffer.Buffer, ref camera, instances);
         });
-
-        vertexBuffer.Return();
     }
 
     public void End()
     {
+        Console.WriteLine("End frame");
         Draw();
-        DrawRectangle();
+        //DrawRectangle();
         commandBuffer.Submit();
+        _borrowedIndexBuffers.ForEach(b => b.Return());
+        _borrowedVertexBuffers.ForEach(b => b.Return());
     }
 }

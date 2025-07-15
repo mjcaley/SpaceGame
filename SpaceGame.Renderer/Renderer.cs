@@ -58,21 +58,16 @@ public class Renderer : IRenderer
         ));
         using var rectFragmentShader = new FragmentShader(
             GpuDevice.Handle,
-            CreateGPUShader(GpuDevice.Handle, new ShaderCreateInfo(
-                Assets.Shaders.QuadFragment.Spirv,
-                "main",
-                GPUShaderFormat.SPIRV,
-                GPUShaderStage.Fragment
+            CreateGPUShader(
+                GpuDevice.Handle,
+                new ShaderCreateInfo(
+                    Assets.Shaders.QuadFragment.Spirv,
+                    "main",
+                    GPUShaderFormat.SPIRV,
+                    GPUShaderStage.Fragment
+                )
             )
-        ));
-
-        ColouredRectanglePipeline = new ColouredRectanglePipeline(
-            Window,
-            GpuDevice,
-            rectVertexShader,
-            rectFragmentShader
         );
-
 
         using var indexedRectVertexShader = new VertexShader(
             GpuDevice.Handle,
@@ -94,6 +89,15 @@ public class Renderer : IRenderer
                 GPUShaderStage.Fragment
             )
         ));
+
+        ColouredRectanglePipeline = new ColouredRectanglePipeline(
+            Window,
+            GpuDevice,
+            indexedRectVertexShader,
+            indexedRectFragmentShader
+        //rectVertexShader,
+        //rectFragmentShader
+        );
 
         IndexedColouredRectanglePipeline = new IndexedColouredRectanglePipeline(
             Window,
@@ -168,7 +172,7 @@ public class Renderer : IRenderer
     {
         IndexBuffer buffer;
 
-        if (_uploadBuffers.Count == 0)
+        if (_indexBuffers.Count == 0)
         {
             buffer = CreateIndexBuffer(size);
         }
@@ -176,7 +180,7 @@ public class Renderer : IRenderer
         {
             buffer = _indexBuffers[0];
             buffer.TryResize(size);
-            _uploadBuffers.RemoveAt(0);
+            _indexBuffers.RemoveAt(0);
         }
 
         return new BorrowedBuffer<IndexBuffer>(buffer, _indexBuffers);
@@ -202,7 +206,7 @@ public class Renderer : IRenderer
     {
         VertexBuffer buffer;
         
-        if (_uploadBuffers.Count == 0)
+        if (_vertexBuffers.Count == 0)
         {
             buffer = CreateVertexBuffer(size);
         }
@@ -210,7 +214,7 @@ public class Renderer : IRenderer
         {
             buffer = _vertexBuffers[0];
             buffer.TryResize(size);
-            _uploadBuffers.RemoveAt(0);
+            _vertexBuffers.RemoveAt(0);
         }
 
         return new BorrowedBuffer<VertexBuffer>(buffer, _vertexBuffers);
