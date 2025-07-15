@@ -2,8 +2,6 @@
 using static SDL3.SDL;
 using System.Numerics;
 using SpaceGame.Infrastructure;
-using SDL3;
-using Slang;
 namespace SpaceGame.Renderer;
 
 public class IndexedColouredRectanglePipeline : IDisposable
