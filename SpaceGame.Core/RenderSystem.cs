@@ -1,10 +1,7 @@
 ﻿using SpaceGame.Core.Components;
 using SpaceGame.Infrastructure;
-using System.Drawing;
 using System.Numerics;
-using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
-using static SDL3.SDL;
 
 namespace SpaceGame.Core
 {
@@ -46,8 +43,9 @@ namespace SpaceGame.Core
                     Size = rectangle.Size,
                     Colour = rectangle.Colour
                 };
-                frame.Draw(rect, new Transformation { Translate = transform.Position });
+                frame.Enqueue(rect, new Transformation { Translate = transform.Position });
             }
+            frame.Draw();
             frame.End();
         }
     }

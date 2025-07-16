@@ -17,19 +17,22 @@ public class ColouredRectanglePipeline : IDisposable
             VertexInputState = new()
             {
                 VertexBufferDescriptions = [
+                        // position
                         new() {
                             Slot = 0,
-                            Pitch = SizeOf<ColouredVertex>(),
+                            Pitch = SizeOf<Vector2>(),
                             InputRate = GPUVertexInputRate.Vertex,
                             InstanceStepRate = 0
                         },
+                        // colour
                         new() {
                             Slot = 1,
-                            Pitch = SizeOf<Matrix4x4>(),
+                            Pitch = SizeOf<Vector4>() + SizeOf<Matrix4x4>(),
                             InputRate = GPUVertexInputRate.Instance,
                             InstanceStepRate = 0
                         }],
                 VertexAttributes = [
+                        // position
                         new()
                         {
                             Location = 0,
@@ -37,41 +40,42 @@ public class ColouredRectanglePipeline : IDisposable
                             Format = GPUVertexElementFormat.Float2,
                             Offset = 0
                         },
+                        // colour
                         new()
                         {
                             Location = 1,
-                            BufferSlot = 0,
+                            BufferSlot = 1,
                             Format = GPUVertexElementFormat.Float4,
-                            Offset = sizeof(float) * 2
+                            Offset = 0
                         },
-                        // matrix 4x4
+                        // model
                         new()
                         {
                             Location = 2,
                             BufferSlot = 1,
                             Format = GPUVertexElementFormat.Float4,
-                            Offset = 0
+                            Offset = SizeOf<Vector4>()
                         },
                         new()
                         {
                             Location = 3,
                             BufferSlot = 1,
                             Format = GPUVertexElementFormat.Float4,
-                            Offset = sizeof(float) * 4
+                            Offset = SizeOf<Vector4>() * 2
                         },
                         new()
                         {
                             Location = 4,
                             BufferSlot = 1,
                             Format = GPUVertexElementFormat.Float4,
-                            Offset = sizeof(float) * 8
+                            Offset = SizeOf<Vector4>() * 3
                         },
                         new()
                         {
                             Location = 5,
                             BufferSlot = 1,
                             Format = GPUVertexElementFormat.Float4,
-                            Offset = sizeof(float) * 12
+                            Offset = SizeOf<Vector4>() * 4
                         }]
             },
             PrimitiveType = GPUPrimitiveType.TriangleList,
@@ -90,19 +94,24 @@ public class ColouredRectanglePipeline : IDisposable
 
     public GraphicsPipeline Pipeline { get; }
 
-    public unsafe void Draw(CommandBufferWithSwapchain cmd, RenderPass pass, VertexBuffer vertices, VertexBuffer models, ref Camera camera, int numInstances)
+    public void Draw(CommandBufferWithSwapchain cmd, RenderPass pass, VertexBuffer vertices, VertexBuffer instanceDetails, ref Camera camera, int numInstances)
+    {
+        Draw(cmd, pass, vertices, 0, instanceDetails, 0, ref camera, numInstances);
+    }
+
+    public unsafe void Draw(CommandBufferWithSwapchain cmd, RenderPass pass, VertexBuffer vertices, uint vertexOffset, VertexBuffer instanceDetails, uint instanceOffset, ref Camera camera, int numInstances)
     {
         PushGPUDebugGroup(cmd.CommandBufferHandle, "ColouredRectanglePipeline.Draw");
         var vertexBindings = new[] {
             new GPUBufferBinding
             {
                 Buffer = vertices.Handle,
-                Offset = 0
+                Offset = vertexOffset
             },
             new GPUBufferBinding
             {
-                Buffer = models.Handle,
-                Offset = 0
+                Buffer = instanceDetails.Handle,
+                Offset = instanceOffset
             }
         };
 
@@ -111,7 +120,7 @@ public class ColouredRectanglePipeline : IDisposable
             BindGPUGraphicsPipeline(pass.Handle, Pipeline.Handle);
             BindGPUVertexBuffers(pass.Handle, 0, vertexBindings, (uint)vertexBindings.Length);
             PushGPUVertexUniformData(cmd.CommandBufferHandle, 0, (nint)cameraPtr, (uint)sizeof(Camera));
-            DrawGPUPrimitives(pass.Handle, (uint)numInstances * 6, (uint)numInstances, 0, 0);
+            DrawGPUPrimitives(pass.Handle, 6, (uint)numInstances, 0, 0);
         }
         PopGPUDebugGroup(cmd.CommandBufferHandle);
     }
