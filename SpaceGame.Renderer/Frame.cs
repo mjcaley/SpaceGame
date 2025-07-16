@@ -94,7 +94,7 @@ public class Frame(CommandBufferWithSwapchain commandBuffer, Renderer renderer) 
         var details = new QuadInstanceDetails
         {
             Colour = rectangle.Colour,
-            Model = Matrix4x4.CreateTranslation(new Vector3(transformation.Translate.X, transformation.Translate.Y, 0f))
+            Model = Matrix4x4.CreateRotationZ(transformation.Rotate) * Matrix4x4.CreateTranslation(new Vector3(transformation.Translate.X, transformation.Translate.Y, 0f))
         };
 
         if (_quads.TryGetValue(key, out List<QuadInstanceDetails>? value))

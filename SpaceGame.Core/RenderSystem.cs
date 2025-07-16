@@ -43,7 +43,7 @@ namespace SpaceGame.Core
                     Size = rectangle.Size,
                     Colour = rectangle.Colour
                 };
-                frame.Enqueue(rect, new Transformation { Translate = transform.Position });
+                frame.Enqueue(rect, new Transformation { Translate = transform.Position, Rotate = transform.Rotation });
             }
             frame.Draw();
             frame.End();
