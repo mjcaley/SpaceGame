@@ -1,48 +1,53 @@
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using SpaceGame.Infrastructure;
+using Slangc.NET;
+using System.Diagnostics;
+using System.Text;
 
 namespace SpaceGame.Assets;
 
-public class ShaderLoader(string basePath, ILoader<Shader>? parent = null) : ILoader<Shader>
+public class Shader
 {
-    private readonly ILoader<Shader>? _parent = parent;
-    private readonly Dictionary<string, Shader> _shaders = new();
-    
-    public bool TryGet(string name, [MaybeNullWhen(false)] out Shader? shader)
-    {
-        if (_shaders.TryGetValue(name, out var s))
-        {
-            shader = s;
-            return true;
-        }
+    private const byte[] _spriv = new byte[2] ( 0x01, 0x02 );
+}
 
-        if (_parent is not null)
-        {
-            _parent.TryGet(name, out shader);
-        }
-        
-        shader = null;
-        return false;
-    }
-    
-    public Shader Load(string name)
+[Generator]
+public class ShaderLoader : IIncrementalGenerator
+{
+    public void Execute(GeneratorExecutionContext context)
     {
-        if (_shaders.TryGetValue(name, out var shader))
-        {
-            return shader;
-        }
-        
-        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"{name}.spv");
-        using var memoryStream = new MemoryStream();
-        stream!.CopyTo(memoryStream);
-        _shaders[name] = new Shader(memoryStream.ToArray());
-        
-        return _shaders[name];
     }
 
-    public ILoader<Shader> AddScope()
+
+    public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        return new ShaderLoader(basePath, this);
+        var pipeline = context.AdditionalTextsProvider
+            .Where(static (text) => text.Path.EndsWith(".slang"))
+            .Select(static (text, cancellationToken) =>
+            {
+                var name = Path.GetFileName(text.Path);
+                var bytes = SlangCompiler.CompileWithReflection(["-g3", text.Path], out SlangReflection reflection);
+                return (name, bytes, reflection);
+            });
+
+        context.RegisterSourceOutput(pipeline,
+            static (context, result) =>
+                // Note: this AddSource is simplified. You will likely want to include the path in the name of the file to avoid
+                // issues with duplicate file names in different paths in the same project.
+                context.AddSource($"{result.name}generated.cs", SourceText.From(
+                    $$"""
+                    namespace SpaceGame.Assets;
+
+                    public class {{result.name}}Shader
+                    {
+                        private const byte[] 
+                    }
+
+                    """, Encoding.UTF8)));
     }
+}
+
 }
