@@ -7,10 +7,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\SpaceGame.Assets.ShaderGenerator\SpaceGame.Assets.ShaderGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
       <ProjectReference Include="..\SpaceGame.Infrastructure\SpaceGame.Infrastructure.csproj" />
     </ItemGroup>
     
     <ItemGroup>
+        <AdditionalFiles Include="indexed-coloured-quad.vert.slang" />
         <None Include="res/shaders/coloured-quad.vert.spv">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
@@ -35,15 +37,6 @@
         <None Include="res/shaders/indexed-coloured-quad.frag.hlsl">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-    </ItemGroup>
-    
-    <ItemGroup>
-      <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
-      <PackageReference Include="Slangc.NET" Version="2025.12.1" />
     </ItemGroup>
 
 </Project>

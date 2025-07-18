@@ -3,5 +3,6 @@
     public class Player
     {
         public float Speed { get; set; }
+        public float Acceleration { get; set; }
     }
 }

@@ -92,6 +92,7 @@ public class PhysicsSystem
 
     public void ApplyForce(B2BodyId id, Vector2 force)
     {
+        Console.WriteLine("applying forice");
         b2Body_ApplyForceToCenter(id, new B2Vec2(force.X, force.Y), true);
     }
 }

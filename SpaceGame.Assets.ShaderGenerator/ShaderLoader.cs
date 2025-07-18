@@ -2,28 +2,33 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using SpaceGame.Infrastructure;
 using Slangc.NET;
 using System.Diagnostics;
 using System.Text;
 
-namespace SpaceGame.Assets;
-
-public class Shader
-{
-    private const byte[] _spriv = new byte[2] ( 0x01, 0x02 );
-}
+namespace SpaceGame.Assets.ShaderGenerator;
 
 [Generator]
 public class ShaderLoader : IIncrementalGenerator
 {
     public void Execute(GeneratorExecutionContext context)
     {
+        Debug.WriteLine("ShaderLoader.Execute called");
+        Debugger.Break();
     }
 
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        Debug.WriteLine("ShaderLoader.Initialize called");
+        Debugger.Break();
+
+#if DEBUG
+        if (!Debugger.IsAttached)
+        {
+            Debugger.Launch();
+        }
+#endif 
         var pipeline = context.AdditionalTextsProvider
             .Where(static (text) => text.Path.EndsWith(".slang"))
             .Select(static (text, cancellationToken) =>
@@ -39,15 +44,16 @@ public class ShaderLoader : IIncrementalGenerator
                 // issues with duplicate file names in different paths in the same project.
                 context.AddSource($"{result.name}generated.cs", SourceText.From(
                     $$"""
+                    using System.Collections.Immutable;
+
                     namespace SpaceGame.Assets;
 
-                    public class {{result.name}}Shader
+                    public static class {{result.name}}Shader
                     {
-                        private const byte[] 
+                        private static ImmutableArray<byte> _spriv = ImmutableArray.Create<byte>([{{string.Join(", ", result.bytes.Select(b => b.ToString()))}}]);
+                        public static ImmutableArray<byte> Spriv => _spirv; 
                     }
 
                     """, Encoding.UTF8)));
     }
-}
-
 }

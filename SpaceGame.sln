@@ -20,6 +20,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{75E8FC9E
 		justfile = justfile
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceGame.Assets.ShaderGenerator", "SpaceGame.Assets.ShaderGenerator\SpaceGame.Assets.ShaderGenerator.csproj", "{1B253371-CF97-4A8B-A446-DF09BD8E320A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceGame.Assets.ShaderGenerator.Tests", "SpaceGame.Assets.ShaderGenerator.Tests\SpaceGame.Assets.ShaderGenerator.Tests.csproj", "{8E96C8B4-14E6-41A0-9F3D-3F8A204223E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +54,14 @@ Global
 		{663D1FCC-03B8-4BEA-BF6C-1365249051FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{663D1FCC-03B8-4BEA-BF6C-1365249051FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{663D1FCC-03B8-4BEA-BF6C-1365249051FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B253371-CF97-4A8B-A446-DF09BD8E320A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B253371-CF97-4A8B-A446-DF09BD8E320A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B253371-CF97-4A8B-A446-DF09BD8E320A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B253371-CF97-4A8B-A446-DF09BD8E320A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E96C8B4-14E6-41A0-9F3D-3F8A204223E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E96C8B4-14E6-41A0-9F3D-3F8A204223E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E96C8B4-14E6-41A0-9F3D-3F8A204223E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E96C8B4-14E6-41A0-9F3D-3F8A204223E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
