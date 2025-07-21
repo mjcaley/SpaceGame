@@ -6,18 +6,16 @@ using System.Reflection;
 using Slangc.NET;
 using System.Diagnostics;
 using System.Text;
+using System.IO.Abstractions;
 
 namespace SpaceGame.Assets.ShaderGenerator;
 
 [Generator]
-public class ShaderGenerator : IIncrementalGenerator
+public class ShaderGenerator(IFileSystem fileSystem) : IIncrementalGenerator
 {
-    //public void Execute(GeneratorExecutionContext context)
-    //{
-    //    Debug.WriteLine("ShaderLoader.Execute called");
-    //    Debugger.Break();
-    //}
+    private readonly IFileSystem _fileSystem = fileSystem;
 
+    public ShaderGenerator() : this(new FileSystem()) { }
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -32,9 +30,9 @@ public class ShaderGenerator : IIncrementalGenerator
 #endif 
         var pipeline = context.AdditionalTextsProvider
             .Where(static (text) => text.Path.EndsWith(".slang"))
-            .Select(static (text, cancellationToken) =>
+            .Select((text, cancellationToken) =>
             {
-                var name = Path.GetFileName(text.Path);
+                var name = _fileSystem.Path.GetFileName(text.Path);
                 var bytes = SlangCompiler.CompileWithReflection(["-g3", text.Path], out SlangReflection reflection);
                 return (name, bytes, reflection);
             });
@@ -59,6 +57,6 @@ public class ShaderGenerator : IIncrementalGenerator
 
                     """, Encoding.UTF8));
             });
-        }
+    }
     }
 

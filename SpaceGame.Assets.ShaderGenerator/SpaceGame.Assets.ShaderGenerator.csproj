@@ -17,12 +17,13 @@
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
 
-    <PackageReference Include="Slangc.NET" Version="2025.12.1" PrivateAssets="all" GeneratePathProperty="true" />
+    <PackageReference Include="Slangc.NET" Version="2025.12.1" GeneratePathProperty="true" />
     <!-- Package the Slangc.NET dependency alongside the generator assembly -->
     <None Include="$(PkgSlangc_NET)\lib\net9.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 
       <!-- Package the generator in the analyzer directory of the nuget package -->
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" PrivateAssets="true" Version="22.0.15" />
   </ItemGroup>
 
 </Project>
