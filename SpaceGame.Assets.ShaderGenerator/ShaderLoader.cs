@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Reflection;
 using Slangc.NET;
 using System.Diagnostics;
@@ -9,13 +10,13 @@ using System.Text;
 namespace SpaceGame.Assets.ShaderGenerator;
 
 [Generator]
-public class ShaderLoader : IIncrementalGenerator
+public class ShaderGenerator : IIncrementalGenerator
 {
-    public void Execute(GeneratorExecutionContext context)
-    {
-        Debug.WriteLine("ShaderLoader.Execute called");
-        Debugger.Break();
-    }
+    //public void Execute(GeneratorExecutionContext context)
+    //{
+    //    Debug.WriteLine("ShaderLoader.Execute called");
+    //    Debugger.Break();
+    //}
 
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -40,9 +41,11 @@ public class ShaderLoader : IIncrementalGenerator
 
         context.RegisterSourceOutput(pipeline,
             static (context, result) =>
+            {
                 // Note: this AddSource is simplified. You will likely want to include the path in the name of the file to avoid
                 // issues with duplicate file names in different paths in the same project.
-                context.AddSource($"{result.name}generated.cs", SourceText.From(
+                var cleanName = string.Join(string.Empty, result.name.Split('-', '_', ' ').Select(w => w.Substring(0, 1).ToUpper() + w.Substring(1)));
+                context.AddSource($"{cleanName}generated.cs", SourceText.From(
                     $$"""
                     using System.Collections.Immutable;
 
@@ -54,6 +57,8 @@ public class ShaderLoader : IIncrementalGenerator
                         public static ImmutableArray<byte> Spriv => _spirv; 
                     }
 
-                    """, Encoding.UTF8)));
+                    """, Encoding.UTF8));
+            });
+        }
     }
-}
+

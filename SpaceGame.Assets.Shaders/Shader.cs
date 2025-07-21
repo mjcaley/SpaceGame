@@ -1,4 +1,4 @@
-﻿namespace SpaceGame.Assets.ShaderGenerator;
+﻿namespace SpaceGame.Assets.Shaders;
 
 public record Shader
 {

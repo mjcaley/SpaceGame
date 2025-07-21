@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceGame.Assets.ShaderGene
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceGame.Assets.ShaderGenerator.Tests", "SpaceGame.Assets.ShaderGenerator.Tests\SpaceGame.Assets.ShaderGenerator.Tests.csproj", "{8E96C8B4-14E6-41A0-9F3D-3F8A204223E4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpaceGame.Assets.Shaders", "SpaceGame.Assets.Shaders\SpaceGame.Assets.Shaders.csproj", "{2B731CD2-5A3F-42EE-8E80-C1EAE209B2C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{8E96C8B4-14E6-41A0-9F3D-3F8A204223E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E96C8B4-14E6-41A0-9F3D-3F8A204223E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E96C8B4-14E6-41A0-9F3D-3F8A204223E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B731CD2-5A3F-42EE-8E80-C1EAE209B2C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B731CD2-5A3F-42EE-8E80-C1EAE209B2C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B731CD2-5A3F-42EE-8E80-C1EAE209B2C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B731CD2-5A3F-42EE-8E80-C1EAE209B2C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

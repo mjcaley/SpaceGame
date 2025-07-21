@@ -1,21 +1,9 @@
-using SpaceGame.Assets.ShaderGenerator;
 using System.Reflection;
 
 namespace SpaceGame.Assets;
 
 public static class Shaders
 {
-    [Shader("index-coloured-quad.vert.slang", Stage.Vertex)]
-    public static partial class ColouredVertexShader
-    {
-        [ShaderFormat(Format.SPIRV)]
-        private static Shader _spriv;
-
-
-        [ShaderFormat(Format.DXIL)]
-        private static Shader _dxil;
-    }
-
     public static class QuadVertex
     {
         public static byte[] Spirv

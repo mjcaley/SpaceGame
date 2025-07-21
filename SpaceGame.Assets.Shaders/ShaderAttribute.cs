@@ -1,4 +1,4 @@
-﻿namespace SpaceGame.Assets.ShaderGenerator;
+﻿namespace SpaceGame.Assets.Shaders;
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 public class ShaderAttribute(string path, Stage stage, string entryPoint = "main") : Attribute
