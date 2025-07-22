@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.Testing;
 using Microsoft.CodeAnalysis.Text;
 using System.Text;
 using VerifyXunit;
+using Xunit.Sdk;
 
 namespace SpaceGame.Assets.ShaderGenerator.Tests;
 
@@ -18,18 +19,26 @@ internal class InMemoryAdditionalText(string path, string content) : AdditionalT
         => _content;
 }
 
+internal class FakeAdditionalText(string path) : AdditionalText
+{
+    public override string Path => path;
+
+    public override SourceText? GetText(CancellationToken cancellationToken = default)
+    {
+        using var stream = new StreamReader(Path);
+        return SourceText.From(stream.ReadToEnd());
+    }
+}
+
 public class UnitTest1
 {
     [Fact]
     public void Test1()
     {
-        var compilation = CSharpCompilation.Create("TestProject");
-        var generator = new ShaderGenerator();
-        var sourceGenerator = generator.AsSourceGenerator();
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(
-            generators: [sourceGenerator],
-            additionalTexts: [new InMemoryAdditionalText("shader.slang", @"struct AssembledVertex
+        var temp = "shader.slang";
+        using (var writer = new StreamWriter(temp))
+        {
+            writer.Write(@"struct AssembledVertex
 {
     float2 position : POSITION;
     float4 color : COLOR;
@@ -70,7 +79,16 @@ func fragmentMain(input: FragmentInput) -> FragmentOutput {
 
     return output;
 }
-")],
+");
+        }
+
+            var compilation = CSharpCompilation.Create("TestProject");
+        var generator = new ShaderGenerator();
+        var sourceGenerator = generator.AsSourceGenerator();
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            generators: [sourceGenerator],
+            additionalTexts: [new FakeAdditionalText("shader.slang")],
             driverOptions: new GeneratorDriverOptions(default, trackIncrementalGeneratorSteps: true))
             .RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
 

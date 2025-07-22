@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SpaceGame.Assets.ShaderGenerator\SpaceGame.Assets.ShaderGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
+      <ProjectReference Include="..\SpaceGame.Assets.ShaderGenerator\SpaceGame.Assets.ShaderGenerator.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
       <ProjectReference Include="..\SpaceGame.Infrastructure\SpaceGame.Infrastructure.csproj" />
     </ItemGroup>
     
@@ -37,6 +37,22 @@
         <None Include="res/shaders/indexed-coloured-quad.frag.hlsl">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <None Update="ShaderTemplate.tt">
+        <Generator>TextTemplatingFileGenerator</Generator>
+        <LastGenOutput>ShaderTemplate.txt</LastGenOutput>
+      </None>
+      <None Update="ShaderTemplate.txt">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>ShaderTemplate.tt</DependentUpon>
+      </None>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
     </ItemGroup>
 
 </Project>
