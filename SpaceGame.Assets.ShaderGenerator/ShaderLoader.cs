@@ -43,14 +43,14 @@ public class ShaderGenerator : IIncrementalGenerator
         //        });
         //#pragma warning restore RSEXPERIMENTAL004 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
-#pragma warning disable RSEXPERIMENTAL004 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-        context.RegisterHostOutput(
-            context.CompilationProvider,
-            (context, cancellationToken) =>
-        {
-            context.AddOutput("ShaderGenerator", "test output");
-        });
-#pragma warning restore RSEXPERIMENTAL004 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+// #pragma warning disable RSEXPERIMENTAL004 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+//         context.RegisterHostOutput(
+//             context.CompilationProvider,
+//             (context, cancellationToken) =>
+//         {
+//             context.AddOutput("ShaderGenerator", "test output");
+//         });
+// #pragma warning restore RSEXPERIMENTAL004 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
         //context.RegisterSourceOutput(
         //        context.AdditionalTextsProvider,
@@ -82,25 +82,22 @@ public class ShaderGenerator : IIncrementalGenerator
                 return (name, bytes, reflection);
             });
 
-        //context.RegisterSourceOutput(pipeline,
-        //    (context, result) =>
-        //    {
-        //        // Note: this AddSource is simplified. You will likely want to include the path in the name of the file to avoid
-        //        // issues with duplicate file names in different paths in the same project.
-        //        var cleanName = string.Join(string.Empty, _fileSystem.Path.GetFileNameWithoutExtension(result.name).Split('-', '_', ' ').Select(w => w.Substring(0, 1).ToUpper() + w.Substring(1)));
-        //        context.AddSource($"{cleanName}generated.cs", SourceText.From(
-        //            $$"""
-        //            using System.Collections.Immutable;
+        context.RegisterSourceOutput(pipeline,
+           (context, result) =>
+           {
+               // Note: this AddSource is simplified. You will likely want to include the path in the name of the file to avoid
+               // issues with duplicate file names in different paths in the same project.
 
-        //            namespace SpaceGame.Assets;
-
-        //            public static class {{result.name}}Shader
-        //            {
-        //                private static ImmutableArray<byte> _spriv = ImmutableArray.Create<byte>([{{string.Join(", ", result.bytes.Select(b => b.ToString()))}}]);
-        //                public static ImmutableArray<byte> Spriv => _spirv; 
-        //            }
-
-        //            """, Encoding.UTF8));
-        //    });
+               var cleanName = string.Join(string.Empty, Path.GetFileNameWithoutExtension(result.name).Split('-', '_', ' ', '.').Select(w => w.Substring(0, 1).ToUpper() + w.Substring(1)));
+               context.AddSource($"{cleanName}generated.cs", SourceText.From(
+                   $$"""
+                   using System.Collections.Immutable;
+                    public static class {{result.name}}Shader
+                    {
+                        private static ImmutableArray<byte> _spriv = ImmutableArray.Create<byte>([{{string.Join(", ", result.bytes.Select(b => b.ToString()))}}]);
+                        public static ImmutableArray<byte> Spriv => _spirv; 
+                    }
+                   """, Encoding.UTF8));
+           });
     }
 }
