@@ -9,6 +9,8 @@
     <ItemGroup>
       <ProjectReference Include="..\SpaceGame.Infrastructure\SpaceGame.Infrastructure.csproj" />
     </ItemGroup>
+
+    
     
     <ItemGroup>
         <None Include="res/shaders/coloured-quad.vert.spv">
@@ -36,5 +38,13 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>
+
+    <Target Name="GenerateShaderAssets" BeforeTargets="Build">
+        <Exec Command="dotnet run --project $(MSBuildProjectDirectory)/../SpaceGame.Build.Shaders/ -- --src $(MSBuildProjectDirectory) --dest $(MSBuildProjectDirectory)/generated --namespace SpaceGame.Assets" />
+    </Target>
+
+    <Target Name="CleanGenerated" AfterTargets="Clean">
+        <RemoveDir Directories="./generated" />
+    </Target>
 
 </Project>

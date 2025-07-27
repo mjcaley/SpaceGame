@@ -1,6 +1,12 @@
+using System.Collections.Immutable;
+
 namespace SpaceGame.Assets;
 
-public record Shader(byte[] content)
+public record Shader
 {
-    public byte[] Content { get; } = content;
+    public ImmutableArray<byte> Code { get; init; }
+    public required ShaderStage Stage { get; init; }
+    public required ShaderFormat Format { get; init; }
+    public required string EntryPoint { get; init; }
+    public required int NumUniform { get; init; }
 }

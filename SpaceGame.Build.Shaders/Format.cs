@@ -1,0 +1,4 @@
+internal enum Format
+{
+    Spirv,
+}

@@ -1,4 +1,4 @@
-﻿using Slangc.NET;
+﻿using SpaceGame.Build.Shaders;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
@@ -29,15 +29,13 @@ rootCommand.SetAction(parseResult =>
     var source = parseResult.GetValue(sourceOption);
     var destination = parseResult.GetValue(destinationOption);
     var @namespace = parseResult.GetValue(namespaceOption);
-
-    foreach (var shader in source.EnumerateFiles("*.slang"))
+    if (source is null || destination is null || @namespace is null)
     {
-        Console.WriteLine($"Found {shader}");
-        var code = SlangCompiler.CompileWithReflection([shader.FullName, "-g3", "-capability", "spirv_1_0"], out var reflection);
-        //var code = SlangCompiler.Compile([shader.FullName, "-g3", "-capability", "spirv_1_0"]);
-        Console.WriteLine($"Length of compiled shader is {code.Length}");
-        // Console.WriteLine($"Reflection data is {reflection}");
+        throw new ArgumentException($"Inputs were null");
     }
+
+    var generator = new SourceGenerator(@namespace, destination);
+    generator.Generate(source.EnumerateFiles("*.slang")).Wait();
 
     return 0;
 });

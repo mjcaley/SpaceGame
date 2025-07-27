@@ -2,7 +2,7 @@ using System.Reflection;
 
 namespace SpaceGame.Assets;
 
-public static class Shaders
+public static partial class Shaders
 {
     public static class QuadVertex
     {
