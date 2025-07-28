@@ -14,26 +14,8 @@ internal class SourceGenerator(string namespaceName, DirectoryInfo outputPath)
         return string.Join(string.Empty, titleWords);
     }
 
-    private static BindingsCount CountBindings(SlangNamedTypeBinding[] bindings)
+    private async Task GenerateFromEntryPoint(string className, Format format, CompiledShader shader)
     {
-        BindingsCount count = new();
-
-        foreach (var binding in bindings.Select(b => b.Binding))
-        {
-            switch (binding.Kind)
-            {
-                case SlangParameterCategory.ConstantBuffer:
-                    count.UniformBuffers++;
-                    break;
-            }
-        }
-
-        return count;
-    }
-
-    private async Task GenerateFromEntryPoint(string className, Format format, byte[] code, SlangEntryPoint entryPoint)
-    {
-        var count = CountBindings(entryPoint.Bindings);
         var generatedCode = @$"using System.Collections.Immutable;
         
 namespace {namespaceName};
@@ -42,15 +24,15 @@ public static partial class Shaders
 {{
     public static partial class {className}
     {{
-        public static partial class {entryPoint.Stage}
+        public static partial class {shader.Stage}
         {{
             public static Shader {format} {{ get; }} = new Shader
             {{
-                    Code = ImmutableArray.Create<byte>([{string.Join(',', code.Select(b => b))}]),
-                    Stage = ShaderStage.{entryPoint.Stage},
+                    Code = ImmutableArray.Create<byte>([{string.Join(',', shader.Code.Select(b => b))}]),
+                    Stage = ShaderStage.{shader.Stage},
                     Format = ShaderFormat.{format},
-                    EntryPoint = ""{entryPoint.Name}"",
-                    NumUniform = {count.UniformBuffers},
+                    EntryPoint = ""{shader.EntryPoint}"",
+                    NumUniform = {shader.BindingsCount.UniformBuffers},
             }};
         }}
     }}
@@ -58,7 +40,7 @@ public static partial class Shaders
 ";
 
         await File.WriteAllTextAsync(
-            Path.Join(outputPath.FullName, className + $".{entryPoint.Stage}.{format}.generated.cs"),
+            Path.Join(outputPath.FullName, className + $".{shader.Stage}.{format}.generated.cs"),
             generatedCode,
             Encoding.UTF8
         );
@@ -69,7 +51,9 @@ public static partial class Shaders
         var code = SlangCompiler.CompileWithReflection(format.AsCompilerArgs(path.FullName), out var reflection);
         var className = ToClassName(path.Name);
 
-        await Task.WhenAll(reflection.EntryPoints.Select(e => GenerateFromEntryPoint(className, format, code, e)));
+        await Task.WhenAll(
+            reflection.EntryPoints
+            .Select(e => GenerateFromEntryPoint(className, format, new CompiledShader(code, e, reflection.Parameters))));
     }
 
     public async Task Generate(IEnumerable<FileInfo> paths)
