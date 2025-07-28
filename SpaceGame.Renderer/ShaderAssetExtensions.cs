@@ -21,6 +21,8 @@ public static class ShaderAssetExtensions
                 ShaderStage.Compute => throw new ArgumentException("Compute shaders not supported in this object")
             },
             NumSamplers = 0,
-
+            NumStorageBuffers = 0,
+            NumStorageTextures = 0,
+            NumUniformBuffers = (uint)shader.NumUniform
         };
 }

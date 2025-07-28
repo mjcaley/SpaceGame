@@ -47,39 +47,17 @@ public class Renderer : IRenderer
     {
         using var rectVertexShader = new VertexShader(
             GpuDevice.Handle,
-            CreateGPUShader(GpuDevice.Handle, new ShaderCreateInfo()
-            {
-                Code = Assets.Shaders.ColouredQuad.Vertex.Spirv.Code.ToArray(),
-                Entrypoint = "main",
-                Format = GPUShaderFormat.SPIRV,
-                Stage = GPUShaderStage.Vertex,
-                NumUniformBuffers = 2,
-            }
-        ));
+            CreateGPUShader(GpuDevice.Handle, Assets.Shaders.ColouredQuad.Vertex.Spirv.ToShaderCreateInfo())
+        );
         using var rectFragmentShader = new FragmentShader(
             GpuDevice.Handle,
-            CreateGPUShader(
-                GpuDevice.Handle,
-                new ShaderCreateInfo(
-                    Assets.Shaders.QuadFragment.Spirv,
-                    "main",
-                    GPUShaderFormat.SPIRV,
-                    GPUShaderStage.Fragment
-                )
-            )
+            CreateGPUShader(GpuDevice.Handle, Assets.Shaders.ColouredQuad.Fragment.Spirv.ToShaderCreateInfo())
         );
 
         using var indexedRectVertexShader = new VertexShader(
             GpuDevice.Handle,
-            CreateGPUShader(GpuDevice.Handle, new ShaderCreateInfo()
-            {
-                Code = Assets.Shaders.IndexedQuadVertex.Spirv,
-                Entrypoint = "main",
-                Format = GPUShaderFormat.SPIRV,
-                Stage = GPUShaderStage.Vertex,
-                NumUniformBuffers = 1,
-            }
-        ));
+            CreateGPUShader(GpuDevice.Handle, Assets.Shaders.IndexedColouredQuad.Vertex.Spirv.ToShaderCreateInfo())
+        );
         using var indexedRectFragmentShader = new FragmentShader(
             GpuDevice.Handle,
             CreateGPUShader(GpuDevice.Handle, new ShaderCreateInfo(
