@@ -49,7 +49,7 @@ public class Renderer : IRenderer
             GpuDevice.Handle,
             CreateGPUShader(GpuDevice.Handle, new ShaderCreateInfo()
             {
-                Code = Assets.Shaders.QuadVertex.Spirv,
+                Code = Assets.Shaders.ColouredQuad.Vertex.Spirv.Code.ToArray(),
                 Entrypoint = "main",
                 Format = GPUShaderFormat.SPIRV,
                 Stage = GPUShaderStage.Vertex,
