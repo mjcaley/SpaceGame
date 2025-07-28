@@ -40,7 +40,7 @@ public static partial class Shaders
 ";
 
         await File.WriteAllTextAsync(
-            Path.Join(outputPath.FullName, className + $".{shader.Stage}.{format}.generated.cs"),
+            Path.Join(outputPath.FullName, $"Shaders.{className}.{shader.Stage}.{format}.g.cs"),
             generatedCode,
             Encoding.UTF8
         );
@@ -49,6 +49,10 @@ public static partial class Shaders
     private async Task Generate(FileInfo path, Format format)
     {
         var code = SlangCompiler.CompileWithReflection(format.AsCompilerArgs(path.FullName), out var reflection);
+        if (code.Length == 0)
+        {
+            throw new CompileException($"Failed to compile {path}");
+        }
         var className = ToClassName(path.Name);
 
         await Task.WhenAll(

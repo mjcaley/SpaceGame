@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Slangc.NET" Version="2025.13.0" />
+    <PackageReference Include="Slangc.NET" Version="2025.13.1" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta6.25358.103" />
   </ItemGroup>
 

@@ -14,5 +14,9 @@ build-source:
 
 build: build-projects build-source
 
-run:
+run: build-projects generate-shader-assets build-source
   dotnet run --project SpaceGame.Console/SpaceGame.Console.csproj
+
+clean:
+  dotnet clean SpaceGame.sln
+  dotnet clean SpaceGame.Build.sln
