@@ -60,13 +60,8 @@ public class Renderer : IRenderer
         );
         using var indexedRectFragmentShader = new FragmentShader(
             GpuDevice.Handle,
-            CreateGPUShader(GpuDevice.Handle, new ShaderCreateInfo(
-                Assets.Shaders.IndexedQuadFragment.Spirv,
-                "main",
-                GPUShaderFormat.SPIRV,
-                GPUShaderStage.Fragment
-            )
-        ));
+            CreateGPUShader(GpuDevice.Handle, Assets.Shaders.IndexedColouredQuad.Fragment.Spirv.ToShaderCreateInfo())
+        );
 
         ColouredRectanglePipeline = new ColouredRectanglePipeline(
             Window,

@@ -13,3 +13,6 @@ build-source:
   dotnet build SpaceGame.sln
 
 build: build-projects build-source
+
+run:
+  dotnet run --project SpaceGame.Console/SpaceGame.Console.csproj
