@@ -11,6 +11,7 @@ public class Renderer : IRenderer
     {
         _window = window;
         _gpuDevice = gpuDevice;
+        _imGuiController = new ImGuiController(this);
         InitPipelines();
     }
 
@@ -22,6 +23,8 @@ public class Renderer : IRenderer
 
     public IWindow Window => _window;
     public IGpuDevice GpuDevice => _gpuDevice;
+
+    private ImGuiController _imGuiController;
 
     public ColouredRectanglePipeline ColouredRectanglePipeline { get; private set; }
     public IndexedColouredRectanglePipeline IndexedColouredRectanglePipeline { get; private set; }
